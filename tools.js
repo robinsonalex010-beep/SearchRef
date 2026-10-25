@@ -1,131 +1,528 @@
-/* Scores and calculators: one list, used by both the homepage and the search page.
-
-   To add a tool, copy one of the lines below and change it:
-     name   – what shows on the button
-     about  – one short line on what it's for
-     url    – where it goes
-     source – who runs it
-     tags   – words people might type when looking for it (lower case, space-separated)
-
-   Licensed tools (QRISK, QFracture, FRAX and so on) are linked, never copied. */
-
-window.GP_TOOLS = [
-  { name: "QRISK3", about: "10-year cardiovascular risk", url: "https://qrisk.org", source: "ClinRisk",
-    tags: "cardiovascular cvd heart attack stroke statin cholesterol lipids hypertension risk" },
-  { name: "QDiabetes", about: "Risk of developing type 2 diabetes", url: "https://qdiabetes.org", source: "ClinRisk",
-    tags: "diabetes prediabetes hba1c glucose risk" },
-  { name: "QCancer", about: "Risk of undiagnosed cancer from symptoms", url: "https://qcancer.org", source: "ClinRisk",
-    tags: "cancer malignancy weight loss referral 2ww suspected" },
-  { name: "QFracture", about: "Risk of osteoporotic and hip fracture", url: "https://qfracture.org", source: "ClinRisk",
-    tags: "fracture osteoporosis bone hip fragility" },
-  { name: "FRAX", about: "10-year fracture probability", url: "https://frax.shef.ac.uk/FRAX/", source: "University of Sheffield",
-    tags: "fracture osteoporosis bone dxa dexa bisphosphonate fragility menopause" },
-  { name: "CHA₂DS₂-VASc", about: "Stroke risk in atrial fibrillation", url: "https://www.mdcalc.com/calc/801", source: "MDCalc",
-    tags: "af atrial fibrillation stroke anticoagulation doac warfarin" },
-  { name: "Wells (DVT)", about: "Pre-test probability of DVT", url: "https://www.mdcalc.com/calc/362", source: "MDCalc",
-    tags: "dvt deep vein thrombosis leg calf swelling d-dimer clot" },
-  { name: "Wells (PE)", about: "Pre-test probability of pulmonary embolism", url: "https://www.mdcalc.com/calc/115", source: "MDCalc",
-    tags: "pe pulmonary embolism breathless breathlessness chest pain d-dimer clot" },
-  { name: "PERC", about: "Rule out PE in low-risk patients", url: "https://www.mdcalc.com/calc/347", source: "MDCalc",
-    tags: "pe pulmonary embolism rule out chest pain" },
-  { name: "CURB-65", about: "Pneumonia severity", url: "https://www.mdcalc.com/calc/324", source: "MDCalc",
-    tags: "pneumonia chest infection lrti severity admission crb-65" },
-  { name: "FeverPAIN", about: "Streptococcal sore throat, NICE-recommended", url: "https://www.mdcalc.com/calc/3316", source: "MDCalc",
-    tags: "sore throat tonsillitis pharyngitis strep streptococcal antibiotics" },
-  { name: "Centor", about: "Streptococcal sore throat", url: "https://www.mdcalc.com/calc/104", source: "MDCalc",
-    tags: "sore throat tonsillitis pharyngitis strep streptococcal antibiotics" },
-  { name: "STOP-Bang", about: "Obstructive sleep apnoea screen", url: "https://www.mdcalc.com/calc/3992", source: "MDCalc",
-    tags: "sleep apnoea apnea osa snoring tired tiredness" },
-  { name: "Epworth", about: "Daytime sleepiness", url: "https://epworthsleepinessscale.com", source: "Official site",
-    tags: "sleep sleepiness apnoea apnea osa tired tiredness driving dvla" },
-  { name: "PHQ-9", about: "Depression severity", url: "https://www.mdcalc.com/calc/1725", source: "MDCalc",
-    tags: "depression low mood mental health" },
-  { name: "GAD-7", about: "Anxiety severity", url: "https://www.mdcalc.com/calc/1727", source: "MDCalc",
-    tags: "anxiety worry panic mental health" },
-  { name: "AUDIT / AUDIT-C", about: "Alcohol use screening", url: "https://www.gov.uk/government/publications/alcohol-use-screening-tests", source: "GOV.UK",
-    tags: "alcohol drinking units" },
-  { name: "eGFR (CKD-EPI)", about: "Estimated GFR", url: "https://www.mdcalc.com/calc/3939", source: "MDCalc",
-    tags: "ckd kidney renal egfr gfr creatinine" },
-  { name: "Creatinine clearance", about: "Cockcroft-Gault, for drug dosing", url: "https://www.mdcalc.com/calc/43", source: "MDCalc",
-    tags: "creatinine clearance renal kidney dosing dose drug cockcroft" },
-  { name: "Corrected calcium", about: "Calcium adjusted for albumin", url: "https://www.mdcalc.com/calc/31", source: "MDCalc",
-    tags: "calcium albumin hypercalcaemia hypocalcaemia" },
-  { name: "FIB-4", about: "Liver fibrosis risk", url: "https://www.mdcalc.com/calc/2200", source: "MDCalc",
-    tags: "liver fibrosis nafld masld fatty lft alt" },
-  { name: "Glasgow-Blatchford", about: "Upper GI bleed risk", url: "https://www.mdcalc.com/calc/518", source: "MDCalc",
-    tags: "gi bleed bleeding haematemesis melaena upper" },
-  { name: "Ottawa ankle", about: "Need for ankle or foot x-ray", url: "https://www.mdcalc.com/calc/1670", source: "MDCalc",
-    tags: "ankle foot injury sprain x-ray xray fracture" },
-  { name: "Canadian C-spine", about: "Need for neck imaging after trauma", url: "https://www.mdcalc.com/calc/696", source: "MDCalc",
-    tags: "neck c-spine cervical spine injury trauma imaging" },
-  { name: "Traffic light system", about: "Feverish illness in under 5s (NICE NG143)", url: "https://www.nice.org.uk/guidance/ng143", source: "NICE",
-    tags: "fever feverish child children paediatric baby infant under sepsis" },
-  { name: "All MDCalc tools", about: "Full calculator library", url: "https://www.mdcalc.com", source: "MDCalc",
-    tags: "calculator calculators score scores" }
-];
-
-(function () {
-  const STOP = new Set(["the", "and", "for", "with", "management", "guideline", "guidelines",
-    "guidance", "treatment", "nice", "patient", "information", "adult", "adults", "dose", "dosing"]);
-
-  function haystack(t) {
-    return (t.name + " " + t.about + " " + t.tags).toLowerCase();
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Clinical reference · GP homescreen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  /* ===== Easy settings: change these values to adjust the look ===== */
+  :root {
+    --title-size: 1.75rem;      /* "Clinical reference" heading */
+    --strapline-size: 1rem;     /* line next to the heading */
+    --search-size: 1.5rem;      /* text in the search box */
+    --footer-size: 0.875rem;    /* small print at the bottom */
+  }
+  /* Colours are just below; the first set is light mode, the second dark mode */
+  /* ================================================================== */
+  :root {
+    --paper: #f6f7f5;
+    --field: #ffffff;
+    --ink: #1e2a30;
+    --muted: #5b6b72;
+    --rule: #d5dbd8;
+    --accent: #1f5d6e;
+    --accent-soft: #e3eef0;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --paper: #141a1d;
+      --field: #1b2327;
+      --ink: #e4e9ea;
+      --muted: #97a6ab;
+      --rule: #2d383c;
+      --accent: #85bccb;
+      --accent-soft: #1d2d33;
+      color-scheme: dark;
+    }
   }
 
-  // Score each tool against a query; short words (dvt, af, osa) must match a whole word.
-  window.gpToolMatches = function (query, limit) {
-    const words = (query || "").toLowerCase().split(/[^a-z0-9-]+/).filter(w => w && !STOP.has(w));
-    if (!words.length) return [];
-    return window.GP_TOOLS
-      .map(t => {
-        const hay = haystack(t);
-        const tokens = hay.split(/[^a-z0-9-]+/);
-        let score = 0;
-        words.forEach(w => {
-          if (w.length >= 4 ? hay.includes(w) : tokens.includes(w)) score++;
-        });
-        return { t, score };
-      })
-      .filter(x => x.score > 0)
-      .sort((a, b) => b.score - a.score)
-      .slice(0, limit || 99)
-      .map(x => x.t);
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: "Public Sans", "Segoe UI", Arial, sans-serif;
+    font-size: 1rem;
+    line-height: 1.5;
+  }
+  a { color: var(--accent); }
+  a:focus-visible, button:focus-visible, input:focus-visible {
+    outline: 3px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  .page { max-width: 72rem; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+
+  .home { display: inline-block; margin-bottom: 0.75rem; font-size: 0.9375rem; text-decoration: none; }
+  .home:hover { text-decoration: underline; }
+  .top { display: flex; align-items: baseline; gap: 0.5rem 1rem; flex-wrap: wrap; margin-bottom: 1.25rem; }
+  .top h1 { font-size: var(--title-size); font-weight: 600; line-height: 1.2; margin: 0; letter-spacing: -0.01em; }
+  .top p { margin: 0; color: var(--muted); font-size: var(--strapline-size); }
+  .top .feedback { margin-left: auto; font-size: 0.9375rem; font-weight: 500; }
+
+  footer {
+    margin-top: 3.5rem; padding-top: 1rem; border-top: 1px solid var(--rule);
+    color: var(--muted); font-size: var(--footer-size); max-width: 48rem;
+  }
+  footer p { margin: 0 0 0.5rem; }
+
+  form { display: flex; gap: 0; border-bottom: 3px solid var(--accent); background: var(--field); }
+  form input {
+    flex: 1; min-width: 0;
+    font: inherit; font-size: var(--search-size); color: var(--ink);
+    background: transparent; border: 0;
+    padding: 0.875rem 1rem;
+  }
+  form input::placeholder { color: var(--muted); opacity: 0.8; }
+  form input:focus-visible { outline: none; }
+  form:focus-within { box-shadow: 0 0 0 3px var(--accent-soft); }
+  form button {
+    font: inherit; font-weight: 600;
+    color: var(--paper); background: var(--accent);
+    border: 0; padding: 0 1.5rem; cursor: pointer;
+  }
+
+  .scope { border: 0; padding: 0; margin: 0.75rem 0 0; display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem 1.5rem; }
+  .seg { display: flex; flex-wrap: wrap; }
+  .seg input { position: absolute; opacity: 0; pointer-events: none; }
+  .seg label {
+    padding: 0.4rem 0.9rem; cursor: pointer; font-size: 0.9375rem; font-weight: 500;
+    border: 1px solid var(--rule); margin-right: -1px; color: var(--muted); background: var(--field);
+  }
+  .seg label:first-of-type { border-radius: 4px 0 0 4px; }
+  .seg label:last-of-type { border-radius: 0 4px 4px 0; }
+  .seg input:checked + label { background: var(--accent); border-color: var(--accent); color: var(--paper); position: relative; }
+  .seg input:focus-visible + label { outline: 3px solid var(--accent); outline-offset: 2px; position: relative; }
+  #nhs { accent-color: var(--accent); width: 1.05rem; height: 1.05rem; margin: 0 -1rem 0 0; cursor: pointer; }
+  .tick { font-size: 0.9375rem; color: var(--muted); cursor: pointer; }
+
+  .direct { margin: 0.75rem 0 0; color: var(--muted); font-size: 0.9375rem; }
+  .direct a { margin-left: 0.75rem; font-weight: 500; }
+
+  .notice {
+    margin: 1.5rem 0; padding: 0.875rem 1rem;
+    background: var(--accent-soft); border-left: 3px solid var(--accent);
+    max-width: 44rem;
+  }
+
+  .layout { margin-top: 2rem; }
+  .links { display: grid; grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr)); gap: 1.75rem 2rem; }
+  .links h2 {
+    font-size: 0.875rem; font-weight: 600; color: var(--muted);
+    margin: 0 0 0.5rem; padding-bottom: 0.375rem; border-bottom: 1px solid var(--rule);
+  }
+  .links ul { list-style: none; margin: 0; padding: 0; }
+  .links li { margin: 0.3rem 0; }
+  .links a { text-decoration: none; }
+  .links a:hover { text-decoration: underline; }
+
+  /* Scores and calculators */
+  .tool-panel { grid-column: 1 / -1; }
+  .tool-filter {
+    font: inherit; font-size: 0.9375rem; color: var(--ink); background: var(--field);
+    border: 1px solid var(--rule); border-radius: 4px; padding: 0.4rem 0.6rem;
+    width: 100%; max-width: 20rem; margin-bottom: 0.6rem;
+  }
+  .tool-filter:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+  .chips a {
+    font-size: 0.875rem; font-weight: 500; text-decoration: none;
+    border: 1px solid var(--rule); background: var(--field); border-radius: 999px;
+    padding: 0.2rem 0.65rem;
+  }
+  .chips a:hover { border-color: var(--accent); }
+  .tool-none { font-size: 0.875rem; color: var(--muted); }
+  .related {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem 0.6rem;
+    padding: 0.6rem 0 0.9rem; margin-bottom: 0.5rem; border-bottom: 1px solid var(--rule);
+  }
+  .related > span { font-size: 0.875rem; color: var(--muted); font-weight: 600; }
+
+  /* Once a search has run: results on the left, links narrow on the right */
+  body.searched .layout { display: grid; grid-template-columns: minmax(0, 1fr) 15rem; gap: 3rem; }
+  body.searched .links { grid-template-columns: 1fr; gap: 1.25rem; font-size: 0.9375rem; }
+  @media (max-width: 52rem) {
+    body.searched .layout { grid-template-columns: 1fr; }
+    body.searched .links { grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr)); }
+  }
+
+  /* Tone down the embedded Google results so they match the page */
+  #results .gsc-control-cse,
+  #results .gsc-webResult.gsc-result,
+  #results .gsc-results .gsc-cursor-box,
+  #results .gsc-above-wrapper-area,
+  #results .gsc-result-info-container {
+    background: transparent !important; border: 0 !important;
+    font-family: inherit !important; padding-left: 0 !important; padding-right: 0 !important;
+  }
+  #results .gs-title, #results .gs-title * { color: var(--accent) !important; font-family: inherit !important; }
+  #results .gs-snippet { color: var(--ink) !important; font-family: inherit !important; }
+  #results .gs-visibleUrl, #results .gsc-result-info { color: var(--muted) !important; font-family: inherit !important; }
+  #results .gsc-cursor-page { color: var(--accent) !important; background: transparent !important; font-family: inherit !important; }
+  #results .gsc-cursor-current-page { color: var(--ink) !important; font-weight: 600; }
+
+  .visually-hidden {
+    position: absolute; width: 1px; height: 1px; overflow: hidden;
+    clip: rect(0 0 0 0); white-space: nowrap;
+  }
+  @media (max-width: 36rem) {
+    .page { padding: 1.25rem 1rem 3rem; }
+    form input { font-size: 1.25rem; }
+    form button { padding: 0 1rem; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <a class="home" href="../">← GP homescreen</a>
+  <header class="top">
+    <h1>Clinical reference</h1>
+    <p>UK guidance, prescribing and professional bodies</p>
+    <a class="feedback" data-feedback href="#" target="_blank" rel="noopener" hidden>Suggest a site or send feedback</a>
+  </header>
+
+  <form id="search" role="search">
+    <label for="q" class="visually-hidden">Search clinical reference</label>
+    <input id="q" type="search" autocomplete="off" spellcheck="true"
+           placeholder="e.g. hypertension in pregnancy">
+    <button type="submit">Search</button>
+  </form>
+  <fieldset class="scope" id="scope">
+    <legend class="visually-hidden">Show results for</legend>
+    <div class="seg">
+      <input type="radio" name="scope" id="scope-clinical" value="clinical" checked>
+      <label for="scope-clinical">Clinical guidance</label>
+      <input type="radio" name="scope" id="scope-patients" value="patients">
+      <label for="scope-patients">Patient information</label>
+      <input type="radio" name="scope" id="scope-all" value="all">
+      <label for="scope-all">Everything</label>
+    </div>
+    <input type="checkbox" id="nhs">
+    <label for="nhs" class="tick">Include NHS website</label>
+  </fieldset>
+  <p class="direct" id="direct" hidden>Search directly in:</p>
+
+  <div class="layout">
+    <section id="results-wrap" aria-live="polite">
+      <div id="notice" class="notice" hidden></div>
+      <div class="related" id="related" hidden><span>Related scores</span><div class="chips" id="related-chips"></div></div>
+      <div id="results"></div>
+    </section>
+
+    <nav class="links" aria-label="Quick links">
+      <div class="tool-panel">
+        <h2>Scores and calculators</h2>
+        <input type="search" class="tool-filter" id="tool-filter" autocomplete="off"
+               placeholder="Filter, e.g. sleep, fracture" aria-label="Filter scores and calculators">
+        <div class="chips" id="tool-chips"></div>
+      </div>
+      <div>
+        <h2>Guidelines</h2>
+        <ul>
+          <li><a href="https://cks.nice.org.uk">NICE CKS</a></li>
+          <li><a href="https://www.nice.org.uk">NICE</a></li>
+          <li><a href="https://www.sign.ac.uk">SIGN</a></li>
+          <li><a href="https://www.rcgp.org.uk">RCGP</a></li>
+          <li><a href="https://gpnotebook.com">GPnotebook</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2>Prescribing</h2>
+        <ul>
+          <li><a href="https://bnf.nice.org.uk">BNF</a></li>
+          <li><a href="https://bnfc.nice.org.uk">BNF for Children</a></li>
+          <li><a href="https://www.sps.nhs.uk">SPS</a></li>
+          <li><a href="https://www.medicines.org.uk/emc">eMC (SmPCs)</a></li>
+          <li><a href="https://www.gov.uk/drug-safety-update">Drug Safety Update</a></li>
+          <li><a href="https://www.otcdirectory.co.uk">OTC Directory</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2>Children</h2>
+        <ul>
+          <li><a href="https://www.rcpch.ac.uk">RCPCH</a></li>
+          <li><a href="https://www.what0-18.nhs.uk">Healthier Together</a></li>
+          <li><a href="https://eric.org.uk">ERIC</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2>Women’s health</h2>
+        <ul>
+          <li><a href="https://www.rcog.org.uk">RCOG</a></li>
+          <li><a href="https://www.fsrh.org">FSRH</a></li>
+          <li><a href="https://thebms.org.uk">British Menopause Society</a></li>
+          <li><a href="https://www.womens-health-concern.org">Women’s Health Concern</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2>Skin</h2>
+        <ul>
+          <li><a href="https://www.pcds.org.uk">PCDS</a></li>
+          <li><a href="https://www.bad.org.uk">BAD</a></li>
+          <li><a href="https://dermnetnz.org">DermNet</a></li>
+          <li><a href="https://eczema.org">National Eczema Society</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2>MSK and acute</h2>
+        <ul>
+          <li><a href="https://www.csp.org.uk">CSP</a></li>
+          <li><a href="https://www.orthobullets.com">Orthobullets</a></li>
+          <li><a href="https://litfl.com">LITFL</a></li>
+          <li><a href="https://www.mdcalc.com">MDCalc</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2>Mental health and neurodiversity</h2>
+        <ul>
+          <li><a href="https://www.mind.org.uk">Mind</a></li>
+          <li><a href="https://www.rcpsych.ac.uk">RCPsych</a></li>
+          <li><a href="https://hubofhope.co.uk">Hub of Hope</a></li>
+          <li><a href="https://adhduk.co.uk/right-to-choose/">ADHD UK: Right to Choose</a></li>
+          <li><a href="https://www.autism.org.uk">National Autistic Society</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2>Respiratory and gut</h2>
+        <ul>
+          <li><a href="https://www.asthmaandlung.org.uk">Asthma + Lung UK</a></li>
+          <li><a href="https://www.brit-thoracic.org.uk">British Thoracic Society</a></li>
+          <li><a href="https://gutscharity.org.uk">Guts UK</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2>Patient information</h2>
+        <ul>
+          <li><a href="https://www.nhs.uk">NHS website</a></li>
+          <li><a href="https://patient.info">Patient</a></li>
+          <li><a href="https://geneticalliance.org.uk">Genetic Alliance UK</a></li>
+          <li><a href="https://www.acas.org.uk">Acas (work and employment)</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2>Evidence and immunisation</h2>
+        <ul>
+          <li><a href="https://pubmed.ncbi.nlm.nih.gov">PubMed</a></li>
+          <li><a href="https://www.gov.uk/government/collections/immunisation-against-infectious-disease-the-green-book">The Green Book</a></li>
+        </ul>
+      </div>
+    </nav>
+  </div>
+
+  <footer>
+    <p>Developed by Dr Alex Robinson, GP, for use by clinicians.</p>
+    <p>This is a Google search restricted to commonly used UK guidance, prescribing and professional sources. It isn’t exhaustive, so no result doesn’t mean no guidance exists; always check the source. There are no AI-generated answers here, only links to the original pages.</p>
+    <p><a data-feedback href="#" target="_blank" rel="noopener" hidden>Suggest a site or send feedback</a></p>
+  </footer>
+</div>
+
+<script src="../tools.js"></script>
+<script>
+  // Paste your Search engine ID (the "cx" value from programmablesearchengine.google.com) between the quotes.
+  const SEARCH_ENGINE_ID = "f041652c2c67d4209";
+
+  // Paste the link to your Google Form (or any feedback page) between the quotes.
+  // Leave it empty and the feedback links stay hidden.
+  const FEEDBACK_URL = "https://docs.google.com/forms/d/e/1FAIpQLSfAaB3qwhD2RBJYMrPzoH6NHwDxFTHq5hlFTZcoKTtbbLGimQ/viewform";
+  if (FEEDBACK_URL) {
+    document.querySelectorAll("[data-feedback]").forEach(a => { a.href = FEEDBACK_URL; a.hidden = false; });
+  }
+
+  // Sites whose own search can be opened directly with the query.
+  const DIRECT = [
+    ["NICE", "https://www.nice.org.uk/search?q="],
+    ["BNF", "https://bnf.nice.org.uk/search/?q="],
+    ["BNFc", "https://bnfc.nice.org.uk/search/?q="],
+    ["PubMed", "https://pubmed.ncbi.nlm.nih.gov/?term="]
+  ];
+
+  // Which sites each toggle option searches. Sites must also be in your engine's
+  // "Sites to search" list in the Google control panel, or they return nothing.
+  const SCOPES = {
+    all: [],
+    patients: [
+      "patient.info", "www.what0-18.nhs.uk", "eric.org.uk",
+      "www.asthmaandlung.org.uk", "eczema.org", "www.mind.org.uk",
+      "www.womens-health-concern.org", "geneticalliance.org.uk",
+      "www.diabetes.org.uk", "theros.org.uk",
+      "hubofhope.co.uk", "adhduk.co.uk", "acas.org.uk", "gutscharity.org.uk",
+      "autism.org.uk",
+      "pcds.org.uk/patient-info-leaflets", "bad.org.uk/pils",
+      "patientinfo.gpnotebook.com"
+    ],
+    clinical: [
+      "nice.org.uk", "patient.info/doctor", "gpnotebook.com", "www.rcgp.org.uk",
+      "www.rcpch.ac.uk", "www.sps.nhs.uk",
+      "www.csp.org.uk", "www.pcds.org.uk", "www.bad.org.uk", "www.orthobullets.com",
+      "litfl.com", "thebms.org.uk", "www.rcog.org.uk", "www.fsrh.org",
+      "www.sign.ac.uk", "www.medicines.org.uk", "www.gov.uk",
+      "www.brit-thoracic.org.uk", "www.rcpsych.ac.uk", "www.rcem.ac.uk",
+      "dermnetnz.org", "www.bashh.org", "www.bsg.org.uk",
+      "www.rheumatology.org.uk", "ukkidney.org", "bihsoc.org",
+      "www.otcdirectory.co.uk", "mdcalc.com"
+    ]
   };
 
-  window.gpToolLink = function (t, withAbout) {
+  // Sections of mixed sites to leave out of each mode
+  const EXCLUDE = {
+    all: [],
+    clinical: ["pcds.org.uk/patient-info-leaflets", "bad.org.uk/pils", "patientinfo.gpnotebook.com"],
+    patients: ["patient.info/doctor"]
+  };
+
+  function currentScope() {
+    return document.querySelector('input[name="scope"]:checked').value;
+  }
+
+  // The NHS website is left out unless the box is ticked: it's searchable, but its
+  // basic pages tend to crowd out more useful results.
+  const NHS_SITE = "www.nhs.uk";
+  const nhsBox = document.getElementById("nhs");
+
+  function scopedQuery(q) {
+    const scope = currentScope();
+    if (scope === "all") return nhsBox.checked ? q : q + " -site:" + NHS_SITE;
+    const sites = SCOPES[scope].concat(nhsBox.checked ? [NHS_SITE] : []);
+    const excluded = EXCLUDE[scope].map(s => " -site:" + s).join("");
+    return q + " (" + sites.map(s => "site:" + s).join(" OR ") + ")" + excluded;
+  }
+
+  const form = document.getElementById("search");
+  const input = document.getElementById("q");
+  const direct = document.getElementById("direct");
+  const notice = document.getElementById("notice");
+  let engineReady = false;
+  let pending = null;
+
+  DIRECT.forEach(([name]) => {
     const a = document.createElement("a");
-    a.href = t.url;
+    a.textContent = name;
     a.target = "_blank";
     a.rel = "noopener";
-    a.title = t.about + " (" + t.source + ")";
-    if (withAbout) {
-      const name = document.createElement("span");
-      name.className = "tool-name";
-      name.textContent = t.name;
-      const about = document.createElement("span");
-      about.className = "tool-about";
-      about.textContent = t.about;
-      a.append(name, about);
-    } else {
-      a.textContent = t.name;
-    }
-    return a;
-  };
+    a.dataset.name = name;
+    direct.appendChild(a);
+  });
 
-  // Wire a filter box to a container: empty filter shows everything.
-  window.gpToolFinder = function (input, container, withAbout) {
+  function showNotice(text) {
+    notice.textContent = text;
+    notice.hidden = false;
+  }
+
+  function loadEngine() {
+    if (!SEARCH_ENGINE_ID) return;
     const render = () => {
-      const q = input.value.trim();
-      const list = q ? window.gpToolMatches(q) : window.GP_TOOLS;
-      container.replaceChildren(...list.map(t => window.gpToolLink(t, withAbout)));
-      if (!list.length) {
-        const none = document.createElement("span");
-        none.className = "tool-none";
-        none.textContent = "Nothing matches; try another word.";
-        container.append(none);
-      }
+      google.search.cse.element.render({
+        div: "results",
+        tag: "searchresults-only",
+        gname: "ref",
+        attributes: { linkTarget: "_blank", autoSearchOnLoad: false }
+      });
+      engineReady = true;
+      if (pending) run(pending);
     };
-    input.addEventListener("input", render);
-    render();
-  };
-})();
+    let started = false;
+    const init = () => {
+      if (started) return;
+      started = true;
+      if (document.readyState === "complete") render();
+      else window.addEventListener("load", render, { once: true });
+    };
+    // Google's documentation and examples use both names, so set both.
+    window.__gcse = {
+      parsetags: "explicit",
+      callback: init,
+      initializationCallback: init
+    };
+    const s = document.createElement("script");
+    s.async = true;
+    s.src = "https://cse.google.com/cse.js?cx=" + encodeURIComponent(SEARCH_ENGINE_ID);
+    s.onerror = () => showNotice("The search service didn’t load on this network. Use the direct links above or the quick links instead.");
+    document.head.appendChild(s);
+  }
+
+  function run(q) {
+    q = q.trim();
+    if (!q) return;
+    document.body.classList.add("searched");
+
+    direct.querySelectorAll("a").forEach(a => {
+      const base = DIRECT.find(([n]) => n === a.dataset.name)[1];
+      a.href = base + encodeURIComponent(q);
+    });
+    direct.hidden = false;
+
+    // Show any scores that match the search terms above the results
+    const related = window.gpToolMatches ? window.gpToolMatches(q, 6) : [];
+    const relatedBox = document.getElementById("related");
+    document.getElementById("related-chips").replaceChildren(...related.map(t => window.gpToolLink(t)));
+    relatedBox.hidden = !related.length;
+
+    const url = new URL(location.href);
+    url.searchParams.set("q", q);
+    if (currentScope() === "clinical") url.searchParams.delete("for");
+    else url.searchParams.set("for", currentScope());
+    if (nhsBox.checked) url.searchParams.set("nhs", "1");
+    else url.searchParams.delete("nhs");
+    history.replaceState(null, "", url);
+
+    if (!SEARCH_ENGINE_ID) {
+      showNotice("Search isn’t set up yet: add your Search engine ID at the top of the script in this file. The direct links above work in the meantime.");
+      return;
+    }
+    if (engineReady) {
+      notice.hidden = true;
+      google.search.cse.element.getElement("ref").execute(scopedQuery(q));
+    } else {
+      pending = q;
+      setTimeout(() => {
+        if (!engineReady) {
+          showNotice("Google’s search hasn’t loaded. An ad or tracker blocker in this browser, or the network, may be stopping it. The direct links above still work.");
+        }
+      }, 8000);
+    }
+  }
+
+  form.addEventListener("submit", e => {
+    e.preventDefault();
+    run(input.value);
+  });
+
+  // Press / anywhere to jump to the search box
+  document.addEventListener("keydown", e => {
+    const tag = document.activeElement && document.activeElement.tagName;
+    if (e.key === "/" && tag !== "INPUT" && tag !== "TEXTAREA") {
+      e.preventDefault();
+      input.focus();
+      input.select();
+    }
+  });
+
+  document.querySelectorAll('input[name="scope"], #nhs').forEach(r => {
+    r.addEventListener("change", () => { if (input.value.trim()) run(input.value); });
+  });
+
+  if (window.gpToolFinder) {
+    window.gpToolFinder(document.getElementById("tool-filter"), document.getElementById("tool-chips"));
+  }
+
+  loadEngine();
+  const params = new URL(location.href).searchParams;
+  const savedScope = params.get("for");
+  if (savedScope && SCOPES[savedScope]) {
+    document.getElementById("scope-" + savedScope).checked = true;
+  }
+  if (params.get("nhs") === "1") nhsBox.checked = true;
+  const initial = params.get("q");
+  if (initial) {
+    input.value = initial;
+    run(initial);
+  }
+  input.focus();
+</script>
+</body>
+</html>

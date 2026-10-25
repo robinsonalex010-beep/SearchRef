@@ -102,6 +102,22 @@
     color: var(--muted); border: 1px solid var(--rule); padding: 0.1rem 0.5rem; border-radius: 3px;
   }
 
+  .tool-filter {
+    font: inherit; font-size: 1rem; color: var(--ink); background: var(--field);
+    border: 1px solid var(--rule); border-radius: 4px; padding: 0.5rem 0.75rem;
+    width: 100%; max-width: 24rem; margin-bottom: 1rem;
+  }
+  .tool-filter:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .calc-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr)); gap: 0.25rem 1.5rem; }
+  .calc-list a {
+    display: block; text-decoration: none; padding: 0.45rem 0;
+    border-bottom: 1px solid var(--rule);
+  }
+  .calc-list a:hover .tool-name { text-decoration: underline; }
+  .tool-name { display: block; font-weight: 600; }
+  .tool-about { display: block; font-size: 0.875rem; color: var(--muted); }
+  .tool-none { color: var(--muted); }
+
   footer {
     margin-top: 4rem; padding-top: 1rem; border-top: 1px solid var(--rule);
     color: var(--muted); font-size: var(--footer-size); max-width: 44rem;
@@ -150,11 +166,21 @@
     </div>
   </div>
 
+  <h2 class="section">Scores and calculators</h2>
+  <input type="search" class="tool-filter" id="tool-filter" autocomplete="off"
+         placeholder="Filter, e.g. sleep, fracture, sore throat" aria-label="Filter scores and calculators">
+  <div class="calc-list" id="calc-list"></div>
+  <p class="hint">Links open the calculator on its own site. Licensed tools such as QRISK3 and FRAX are linked, not copied.</p>
+
   <footer>
     <p>Developed by Dr Alex Robinson, GP, for use by clinicians. Independent; not affiliated with the NHS or NICE.</p>
     <p>These tools point to published guidance and don’t replace it; always check the source. No AI-generated answers.</p>
     <p><a href="https://docs.google.com/forms/d/e/1FAIpQLSfAaB3qwhD2RBJYMrPzoH6NHwDxFTHq5hlFTZcoKTtbbLGimQ/viewform" target="_blank" rel="noopener">Suggest a site or send feedback</a></p>
   </footer>
 </div>
+<script src="tools.js"></script>
+<script>
+  gpToolFinder(document.getElementById("tool-filter"), document.getElementById("calc-list"), true);
+</script>
 </body>
 </html>

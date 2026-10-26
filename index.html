@@ -114,6 +114,11 @@
     border-bottom: 1px solid var(--rule);
   }
   .calc-list a:hover .tool-name { text-decoration: underline; }
+  .calc-list.is-grouped { gap: 1.75rem 2rem; align-items: start; }
+  .calc-group h3 {
+    font-size: 0.8125rem; font-weight: 600; color: var(--muted); text-transform: uppercase;
+    letter-spacing: 0.04em; margin: 0 0 0.25rem;
+  }
   .tool-name { display: block; font-weight: 600; }
   .tool-about { display: block; font-size: 0.875rem; color: var(--muted); }
   .tool-none { color: var(--muted); }
@@ -156,6 +161,11 @@
       <p>A search restricted to UK guidance, prescribing and professional bodies, with filters for clinical guidance or patient information, and quick links to the sources GPs use most.</p>
     </a>
 
+    <a class="tool" href="patient-links/">
+      <h3>Patient links</h3>
+      <p>Trusted patient information and local services, each with a QR code to show on screen for the patient to scan, or a link to copy and send.</p>
+    </a>
+
     <!-- When the NG12 tool is ready: put its file in a folder called ng12 as index.html,
          then change the line below to  <a class="tool" href="ng12/">  and the closing </div> to </a>,
          and delete the "Coming soon" line. -->
@@ -166,11 +176,11 @@
     </div>
   </div>
 
-  <h2 class="section">Scores and calculators</h2>
+  <h2 class="section">Scores, calculators and forms</h2>
   <input type="search" class="tool-filter" id="tool-filter" autocomplete="off"
-         placeholder="Filter, e.g. sleep, fracture, sore throat" aria-label="Filter scores and calculators">
+         placeholder="Filter, e.g. sleep, fracture, ADHD" aria-label="Filter scores, calculators and forms">
   <div class="calc-list" id="calc-list"></div>
-  <p class="hint">Links open the calculator on its own site. Licensed tools such as QRISK3 and FRAX are linked, not copied.</p>
+  <p class="hint">External tools open on their own sites; licensed tools such as QRISK3 and FRAX are linked, not copied. Forms marked “Form on this site” can be filled in, scored and printed or saved as PDF.</p>
 
   <footer>
     <p>Developed by Dr Alex Robinson, GP, for use by clinicians. Independent; not affiliated with the NHS or NICE.</p>
@@ -180,7 +190,7 @@
 </div>
 <script src="tools.js"></script>
 <script>
-  gpToolFinder(document.getElementById("tool-filter"), document.getElementById("calc-list"), true);
+  gpToolFinder(document.getElementById("tool-filter"), document.getElementById("calc-list"), "grouped");
 </script>
 </body>
 </html>

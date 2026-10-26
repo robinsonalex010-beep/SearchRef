@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SNAP-IV 18-item rating scale · GP homescreen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #f6f7f5; --field: #ffffff; --ink: #1e2a30; --muted: #5b6b72;
+    --rule: #d5dbd8; --accent: #1f5d6e; --accent-soft: #e3eef0;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --paper: #141a1d; --field: #1b2327; --ink: #e4e9ea; --muted: #97a6ab;
+      --rule: #2d383c; --accent: #85bccb; --accent-soft: #1d2d33;
+      color-scheme: dark;
+    }
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background: var(--paper); color: var(--ink);
+    font-family: "Public Sans", "Segoe UI", Arial, sans-serif; line-height: 1.5;
+  }
+  a { color: var(--accent); }
+  .page { max-width: 52rem; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+  .home { display: inline-block; margin-bottom: 0.75rem; font-size: 0.9375rem; text-decoration: none; }
+  h1 { font-size: 1.75rem; font-weight: 600; line-height: 1.2; margin: 0 0 0.25rem; letter-spacing: -0.01em; }
+  .credit { color: var(--muted); margin: 0 0 1.25rem; }
+  .intro {
+    background: var(--accent-soft); border-left: 3px solid var(--accent);
+    padding: 0.75rem 1rem; margin: 0 0 1.75rem; font-size: 0.9375rem;
+  }
+  .intro p { margin: 0 0 0.4rem; }
+  .intro p:last-child { margin: 0; }
+
+  .details { display: grid; grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr)); gap: 0.75rem 1.25rem; margin-bottom: 1.5rem; }
+  .details label { display: block; font-size: 0.875rem; font-weight: 600; margin-bottom: 0.2rem; }
+  .details input[type="text"] {
+    width: 100%; font: inherit; color: var(--ink); background: var(--field);
+    border: 1px solid var(--rule); border-radius: 4px; padding: 0.4rem 0.55rem;
+  }
+  .who { grid-column: 1 / -1; border: 0; padding: 0; margin: 0; }
+  .who legend { font-size: 0.875rem; font-weight: 600; margin-bottom: 0.3rem; padding: 0; }
+  .who label { display: inline-flex; align-items: center; gap: 0.35rem; margin-right: 1.25rem; font-weight: 400; font-size: 1rem; }
+
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; background: var(--field); }
+  th, td { border: 1px solid var(--rule); padding: 0.35rem 0.5rem; }
+  thead th { font-size: 0.8125rem; font-weight: 600; text-align: center; width: 4.75rem; line-height: 1.25; }
+  thead th:first-child { text-align: left; width: auto; }
+  tbody td:first-child { font-size: 0.9375rem; }
+  tbody td:not(:first-child) { text-align: center; }
+  tbody tr:nth-child(even) { background: color-mix(in srgb, var(--accent-soft) 45%, transparent); }
+  .num { display: inline-block; min-width: 1.6rem; color: var(--muted); }
+
+  input[type="radio"] {
+    appearance: none; -webkit-appearance: none; margin: 0; cursor: pointer;
+    width: 1.1rem; height: 1.1rem; border: 1.5px solid var(--muted); border-radius: 50%;
+    display: inline-grid; place-content: center; vertical-align: middle; background: var(--field);
+  }
+  input[type="radio"]::before {
+    content: ""; width: 0.55rem; height: 0.55rem; border-radius: 50%;
+    transform: scale(0); background: var(--accent);
+  }
+  input[type="radio"]:checked { border-color: var(--accent); }
+  input[type="radio"]:checked::before { transform: scale(1); }
+  input:focus-visible, button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+  .scoring { margin-top: 1.75rem; border: 1px solid var(--rule); background: var(--field); padding: 1rem 1.25rem; }
+  .scoring h2 { font-size: 1rem; font-weight: 600; margin: 0 0 0.5rem; }
+  .scoring table { background: transparent; font-size: 0.9375rem; }
+  .scoring th, .scoring td { text-align: left; }
+  .scoring thead th { width: auto; font-size: 0.875rem; }
+  .scoring td:not(:first-child), .scoring th:not(:first-child) { white-space: nowrap; }
+  .scoring .flag { font-weight: 600; }
+  .scoring p { margin: 0.6rem 0 0; font-size: 0.875rem; color: var(--muted); }
+  .progress { font-weight: 600; color: var(--ink) !important; }
+
+  .actions { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 1.5rem; }
+  .actions button {
+    font: inherit; font-weight: 600; cursor: pointer; border-radius: 4px; padding: 0.6rem 1.1rem;
+    border: 1px solid var(--accent);
+  }
+  .primary { background: var(--accent); color: var(--paper); }
+  .secondary { background: transparent; color: var(--accent); }
+  .tip { font-size: 0.875rem; color: var(--muted); margin: 0.6rem 0 0; }
+
+  .print-only { display: none; }
+
+  /* ===== Printed / PDF version: plain black and white, fits A4 ===== */
+  @media print {
+    @page { size: A4; margin: 12mm; }
+    :root { --paper: #fff; --field: #fff; --ink: #000; --muted: #000; --rule: #000; --accent: #000; --accent-soft: #fff; }
+    body { font-family: Arial, sans-serif; font-size: 9.5pt; line-height: 1.3; }
+    .page { max-width: none; padding: 0; }
+    .home, .intro, .actions, .tip { display: none !important; }
+    .print-only { display: block; }
+    h1 { font-size: 13pt; }
+    .credit { font-size: 9pt; margin-bottom: 4mm; }
+    .details { grid-template-columns: 1fr 1fr 1fr; gap: 2mm 5mm; margin-bottom: 4mm; }
+    .details label { font-size: 8pt; margin: 0; }
+    .details input[type="text"] {
+      border: 0; border-bottom: 0.6pt solid #000; border-radius: 0; padding: 0.5mm 0; font-size: 9.5pt;
+    }
+    .details input::placeholder { color: transparent; }
+    .who legend { font-size: 8pt; margin-bottom: 0.5mm; }
+    .who label { font-size: 9pt; }
+    th, td { padding: 0.6mm 1.5mm; border: 0.6pt solid #000; }
+    tbody tr:nth-child(even) { background: none; }
+    tbody td:first-child { font-size: 9pt; }
+    thead th { font-size: 8.5pt; width: 15mm; }
+    input[type="radio"] { width: 3.2mm; height: 3.2mm; border: 0.8pt solid #000; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    input[type="radio"]::before { width: 1.8mm; height: 1.8mm; background: #000; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .scoring { margin-top: 4mm; padding: 2.5mm 3.5mm; border: 0.6pt solid #000; break-inside: avoid; }
+    .scoring h2 { font-size: 10pt; margin-bottom: 1.5mm; }
+    .scoring table { font-size: 9pt; }
+    .scoring thead th { font-size: 8.5pt; width: auto; }
+    .scoring p { font-size: 8pt; margin-top: 1.5mm; }
+    .printed { font-size: 8pt; margin-top: 3mm; }
+    .no-print { display: none !important; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <a class="home" href="/">← GP homescreen</a>
+  <h1>SNAP-IV Teacher and Parent 18-Item Rating Scale</h1>
+  <p class="credit">James M. Swanson, PhD, University of California, Irvine</p>
+
+  <div class="intro">
+    <p>Fill this in on screen, then print it or save it as a PDF to upload to the record.</p>
+    <p>Nothing you type is saved or sent anywhere; it stays in this browser window and is cleared when you close it.</p>
+  </div>
+
+  <form id="snap" autocomplete="off" onsubmit="return false">
+    <div class="details">
+      <div><label for="name">Child’s name</label><input type="text" id="name"></div>
+      <div><label for="dob">Date of birth</label><input type="text" id="dob" placeholder="dd/mm/yyyy" inputmode="numeric"></div>
+      <div><label for="year">School year</label><input type="text" id="year"></div>
+      <div><label for="completed">Completed by</label><input type="text" id="completed"></div>
+      <div><label for="date">Date</label><input type="text" id="date" placeholder="dd/mm/yyyy" inputmode="numeric"></div>
+      <div><label for="clinician">Clinician</label><input type="text" id="clinician"></div>
+      <fieldset class="who">
+        <legend>Completed by a</legend>
+        <label><input type="radio" name="who" value="parent"> Parent or carer</label>
+        <label><input type="radio" name="who" value="teacher"> Teacher</label>
+        <label><input type="radio" name="who" value="other"> Other</label>
+      </fieldset>
+    </div>
+
+    <p class="credit" style="margin-bottom:0.6rem">For each item, choose the answer which best describes this child or young person:</p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th scope="col">Item</th><th scope="col">Not at all</th><th scope="col">Just a little</th><th scope="col">Quite a bit</th><th scope="col">Very much</th></tr>
+        </thead>
+        <tbody id="items"></tbody>
+      </table>
+    </div>
+
+    <section class="scoring" aria-live="polite">
+      <h2>Scoring</h2>
+      <table>
+        <thead><tr><th>Subscale</th><th>Total</th><th>Average</th><th>Items scoring 2 or 3</th><th id="cut-head">Cut-off</th></tr></thead>
+        <tbody>
+          <tr><td>Inattention (items 1–9)</td><td id="ia-total">–</td><td id="ia-avg">–</td><td id="ia-count">–</td><td id="ia-cut">–</td></tr>
+          <tr><td>Hyperactivity/impulsivity (10–18)</td><td id="hi-total">–</td><td id="hi-avg">–</td><td id="hi-count">–</td><td id="hi-cut">–</td></tr>
+          <tr><td>Combined (1–18)</td><td id="all-total">–</td><td id="all-avg">–</td><td id="all-count">–</td><td id="all-cut">–</td></tr>
+        </tbody>
+      </table>
+      <p class="progress" id="progress"></p>
+      <p>Items score 0 (not at all), 1, 2 or 3 (very much). Cut-offs are the commonly published averages for parent and teacher ratings: inattention 1.78 (parent) and 2.56 (teacher), hyperactivity/impulsivity 1.44 and 1.78, combined 1.67 and 2.00. Six or more items rated “quite a bit” or “very much” in a subscale is the symptom-count approach. A screening and monitoring tool only; it does not diagnose ADHD.</p>
+    </section>
+
+    <p class="print-only printed" id="printed"></p>
+
+    <div class="actions">
+      <button type="button" class="primary" id="print">Print or save as PDF</button>
+      <button type="button" class="secondary" id="clear">Clear form</button>
+    </div>
+    <p class="tip">To save a PDF, choose “Save as PDF” or “Microsoft Print to PDF” as the printer in the print window.</p>
+  </form>
+</div>
+
+<script>
+  const ITEMS = [
+    "Often fails to give close attention to details or makes careless mistakes in schoolwork or tasks",
+    "Often has difficulty sustaining attention in tasks or play activities",
+    "Often does not seem to listen when spoken to directly",
+    "Often does not follow through on instructions and fails to finish schoolwork, chores, or duties",
+    "Often has difficulty organizing tasks and activities",
+    "Often avoids, dislikes, or reluctantly engages in tasks requiring sustained mental effort",
+    "Often loses things necessary for activities (e.g., toys, school assignments, pencils or books)",
+    "Often is distracted by extraneous stimuli",
+    "Often is forgetful in daily activities",
+    "Often fidgets with hands or feet or squirms in seat",
+    "Often leaves seat in classroom or in other situations in which remaining seated is expected",
+    "Often runs about or climbs excessively in situations in which it is inappropriate",
+    "Often has difficulty playing or engaging in leisure activities quietly",
+    "Often is “on the go” or often acts as if “driven by a motor”",
+    "Often talks excessively",
+    "Often blurts out answers before questions have been completed",
+    "Often has difficulty awaiting turn",
+    "Often interrupts or intrudes on others (e.g., butts into conversations/games)"
+  ];
+  const LABELS = ["Not at all", "Just a little", "Quite a bit", "Very much"];
+  const CUTS = {
+    parent:  { ia: 1.78, hi: 1.44, all: 1.67 },
+    teacher: { ia: 2.56, hi: 1.78, all: 2.00 }
+  };
+
+  const tbody = document.getElementById("items");
+  ITEMS.forEach((text, i) => {
+    const tr = document.createElement("tr");
+    const td = document.createElement("td");
+    td.innerHTML = '<span class="num">' + (i + 1) + '.</span>';
+    td.append(text);
+    tr.append(td);
+    for (let v = 0; v < 4; v++) {
+      const cell = document.createElement("td");
+      const r = document.createElement("input");
+      r.type = "radio";
+      r.name = "q" + i;
+      r.value = v;
+      r.setAttribute("aria-label", "Item " + (i + 1) + ": " + LABELS[v]);
+      cell.append(r);
+      tr.append(cell);
+    }
+    tbody.append(tr);
+  });
+
+  function answer(i) {
+    const r = document.querySelector('input[name="q' + i + '"]:checked');
+    return r ? Number(r.value) : null;
+  }
+
+  function subscale(from, to) {
+    let total = 0, answered = 0, count = 0;
+    for (let i = from; i <= to; i++) {
+      const a = answer(i);
+      if (a === null) continue;
+      total += a; answered++;
+      if (a >= 2) count++;
+    }
+    return { total, answered, count, n: to - from + 1, avg: answered ? total / answered : null };
+  }
+
+  function update() {
+    const who = (document.querySelector('input[name="who"]:checked') || {}).value;
+    const cuts = CUTS[who];
+    const parts = { ia: subscale(0, 8), hi: subscale(9, 17), all: subscale(0, 17) };
+    Object.entries(parts).forEach(([k, s]) => {
+      document.getElementById(k + "-total").textContent = s.answered ? s.total + " / " + (s.n * 3) : "–";
+      document.getElementById(k + "-avg").textContent = s.avg === null ? "–" : s.avg.toFixed(2);
+      document.getElementById(k + "-count").textContent = s.answered ? s.count + " of " + s.n : "–";
+      const cell = document.getElementById(k + "-cut");
+      cell.className = "";
+      if (!cuts) { cell.textContent = who === "other" ? "n/a" : "Choose parent or teacher"; return; }
+      if (s.avg === null) { cell.textContent = cuts[k].toFixed(2); return; }
+      const above = s.avg >= cuts[k];
+      cell.textContent = cuts[k].toFixed(2) + (above ? " – at or above" : " – below");
+      if (above) cell.className = "flag";
+    });
+    const done = parts.all.answered;
+    document.getElementById("progress").textContent =
+      done === 18 ? "All 18 items answered." : done + " of 18 items answered; averages are based on the answered items.";
+  }
+
+  document.getElementById("snap").addEventListener("change", update);
+
+  // Default the date to today
+  const today = new Date();
+  const todayText = today.toLocaleDateString("en-GB");
+  document.getElementById("date").value = todayText;
+
+  document.getElementById("print").addEventListener("click", () => {
+    const name = document.getElementById("name").value.trim();
+    const date = document.getElementById("date").value;
+    document.getElementById("printed").textContent =
+      "SNAP-IV 18-item (Swanson). Screening tool only, not diagnostic. Completed via gphomescreen.org.uk; printed " +
+      todayText + ".";
+    const original = document.title;
+    // The title becomes the suggested PDF file name
+    document.title = "SNAP-IV" + (name ? " - " + name : "") + (date ? " - " + date.replace(/\//g, "-") : "");
+    window.print();
+    document.title = original;
+  });
+
+  document.getElementById("clear").addEventListener("click", () => {
+    if (!confirm("Clear all answers and details?")) return;
+    document.getElementById("snap").reset();
+    document.getElementById("date").value = todayText;
+    update();
+  });
+
+  update();
+</script>
+</body>
+</html>

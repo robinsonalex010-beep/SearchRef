@@ -246,7 +246,7 @@
         <h2>Children</h2>
         <ul>
           <li><a href="https://www.rcpch.ac.uk">RCPCH</a></li>
-          <li><a href="https://www.what0-18.nhs.uk">Healthier Together</a></li>
+          <li><a href="https://www.healthiertogether.nhs.uk">Healthier Together</a></li>
           <li><a href="https://eric.org.uk">ERIC</a></li>
         </ul>
       </div>
@@ -346,7 +346,7 @@
   const SCOPES = {
     all: [],
     patients: [
-      "patient.info", "www.what0-18.nhs.uk", "eric.org.uk",
+      "patient.info", "www.what0-18.nhs.uk", "www.healthiertogether.nhs.uk", "eric.org.uk",
       "www.asthmaandlung.org.uk", "eczema.org", "www.mind.org.uk",
       "www.womens-health-concern.org", "geneticalliance.org.uk",
       "www.diabetes.org.uk", "theros.org.uk",
@@ -370,9 +370,9 @@
 
   // Sections of mixed sites to leave out of each mode
   const EXCLUDE = {
-    all: [],
+    all: ["patient.info/forums"],
     clinical: ["pcds.org.uk/patient-info-leaflets", "bad.org.uk/pils", "patientinfo.gpnotebook.com"],
-    patients: ["patient.info/doctor"]
+    patients: ["patient.info/doctor", "patient.info/forums"]
   };
 
   function currentScope() {
@@ -386,7 +386,9 @@
 
   function scopedQuery(q) {
     const scope = currentScope();
-    if (scope === "all") return nhsBox.checked ? q : q + " -site:" + NHS_SITE;
+    if (scope === "all") {
+      return q + (nhsBox.checked ? "" : " -site:" + NHS_SITE) + EXCLUDE.all.map(s => " -site:" + s).join("");
+    }
     const sites = SCOPES[scope].concat(nhsBox.checked ? [NHS_SITE] : []);
     const excluded = EXCLUDE[scope].map(s => " -site:" + s).join("");
     return q + " (" + sites.map(s => "site:" + s).join(" OR ") + ")" + excluded;

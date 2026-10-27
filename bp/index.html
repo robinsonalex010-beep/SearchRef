@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="A simple home blood pressure diary. Your readings stay on your phone until you choose to send them.">
+<title>Home blood pressure diary</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #f6f7f5; --field: #ffffff; --ink: #1e2a30; --muted: #5b6b72;
+    --rule: #d5dbd8; --accent: #1f5d6e; --accent-soft: #e3eef0;
+    --alert: #b3261e; --alert-soft: #fbe9e7;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --paper: #141a1d; --field: #1b2327; --ink: #e4e9ea; --muted: #97a6ab;
+      --rule: #2d383c; --accent: #85bccb; --accent-soft: #1d2d33;
+      --alert: #ff8a80; --alert-soft: #3a1d1b;
+      color-scheme: dark;
+    }
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background: var(--paper); color: var(--ink);
+    font-family: "Public Sans", "Segoe UI", Arial, sans-serif; font-size: 17px; line-height: 1.5;
+  }
+  a { color: var(--accent); }
+  :focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  .page { max-width: 34rem; margin: 0 auto; padding: 1.25rem 1rem 3rem; }
+  h1 { font-size: 1.6rem; line-height: 1.2; margin: 0 0 0.35rem; }
+  h2 { font-size: 1.15rem; margin: 0 0 0.6rem; }
+  .lead { color: var(--muted); margin: 0 0 1rem; }
+  .panel { background: var(--field); border: 1px solid var(--rule); border-radius: 8px; padding: 1rem; margin-top: 1rem; }
+  .privacy { font-size: 0.9375rem; background: var(--accent-soft); border-left: 3px solid var(--accent); padding: 0.7rem 0.85rem; border-radius: 4px; }
+
+  details.how > summary { font-weight: 700; font-size: 1.1rem; cursor: pointer; }
+  .how ol { padding-left: 1.3rem; margin: 0.6rem 0 0; }
+  .how li { margin-bottom: 0.4rem; }
+
+  .fields { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.6rem; }
+  .fields label, .when label, .who label { display: block; font-size: 0.875rem; font-weight: 600; margin-bottom: 0.2rem; }
+  input[type="number"], input[type="text"], input[type="datetime-local"] {
+    width: 100%; font: inherit; color: var(--ink); background: var(--paper);
+    border: 1px solid var(--rule); border-radius: 6px; padding: 0.55rem 0.6rem;
+  }
+  input[type="number"] { font-size: 1.35rem; font-weight: 600; text-align: center; }
+  .when { margin-top: 0.6rem; }
+  .btn {
+    font: inherit; font-weight: 700; cursor: pointer; border-radius: 6px; padding: 0.7rem 1rem;
+    border: 1px solid var(--accent); background: var(--accent); color: var(--paper); width: 100%; margin-top: 0.8rem;
+  }
+  .btn.secondary { background: transparent; color: var(--accent); }
+  .btn.small { width: auto; padding: 0.4rem 0.8rem; font-size: 0.9rem; margin: 0; }
+  .error { color: var(--alert); font-weight: 600; font-size: 0.9375rem; margin: 0.5rem 0 0; }
+
+  .alert { border: 2px solid var(--alert); background: var(--alert-soft); border-radius: 8px; padding: 0.9rem 1rem; margin-top: 1rem; }
+  .alert p { margin: 0 0 0.5rem; }
+  .alert p:last-child { margin: 0; }
+  .alert strong { color: var(--alert); }
+
+  .summary { font-size: 1rem; }
+  .avg { font-size: 2.1rem; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1.1; margin: 0.2rem 0; }
+  .summary .small { font-size: 0.875rem; color: var(--muted); margin: 0.2rem 0 0; }
+
+  .day { margin-top: 0.9rem; }
+  .day h3 { font-size: 0.9375rem; margin: 0 0 0.3rem; color: var(--muted); }
+  .day.first h3::after { content: " · not counted in the average"; font-weight: 400; }
+  .reading { display: flex; justify-content: space-between; align-items: center; padding: 0.4rem 0; border-bottom: 1px solid var(--rule); gap: 0.5rem; }
+  .reading .bp { font-weight: 700; font-variant-numeric: tabular-nums; font-size: 1.1rem; }
+  .reading .bp.high { color: var(--alert); }
+  .reading .t { color: var(--muted); font-size: 0.9rem; min-width: 3.5rem; }
+  .reading .pulse { color: var(--muted); font-size: 0.9rem; flex: 1; }
+  .del { font: inherit; font-size: 0.8125rem; color: var(--muted); background: none; border: 1px solid var(--rule); border-radius: 4px; padding: 0.15rem 0.5rem; cursor: pointer; }
+  .empty { color: var(--muted); }
+
+  .who { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; }
+  .actions { display: grid; gap: 0.5rem; }
+  .foot { font-size: 0.8125rem; color: var(--muted); margin-top: 1.5rem; }
+</style>
+</head>
+<body>
+<div class="page">
+  <h1>Home blood pressure diary</h1>
+  <p class="lead">Record your readings here, then send the summary to your GP practice.</p>
+  <p class="privacy">Your readings are saved on this phone only, in this web browser. Nothing is sent anywhere until you choose to send the summary. Use the same phone and browser each time, and don’t use private browsing, or your readings won’t be kept.</p>
+
+  <div class="panel">
+    <details class="how" id="how">
+      <summary>How to take your blood pressure</summary>
+      <ol>
+        <li>Don’t smoke, have caffeine or exercise for 30 minutes before.</li>
+        <li>Sit in a chair with your back supported and your feet flat on the floor. Rest your arm on a table so the cuff is at the level of your heart.</li>
+        <li>Sit quietly for 5 minutes without talking.</li>
+        <li>Take a reading, wait 1 minute, then take a second reading. Enter both.</li>
+        <li>Do this twice a day, morning and evening, for 7 days if you can (at least 4 days).</li>
+      </ol>
+    </details>
+  </div>
+
+  <div class="panel">
+    <h2>Add a reading</h2>
+    <div class="fields">
+      <div><label for="sys">Top number</label><input id="sys" type="number" inputmode="numeric" min="40" max="300" placeholder="138"></div>
+      <div><label for="dia">Bottom number</label><input id="dia" type="number" inputmode="numeric" min="20" max="200" placeholder="86"></div>
+      <div><label for="pulse">Pulse <span style="font-weight:400">(optional)</span></label><input id="pulse" type="number" inputmode="numeric" min="20" max="250"></div>
+    </div>
+    <div class="when"><label for="when">Date and time</label><input id="when" type="datetime-local"></div>
+    <p class="error" id="error" hidden></p>
+    <button type="button" class="btn" id="add">Add reading</button>
+  </div>
+
+  <div id="alert"></div>
+
+  <div class="panel summary" id="summary"></div>
+
+  <div class="panel">
+    <h2>Your readings</h2>
+    <div id="readings"></div>
+  </div>
+
+  <div class="panel">
+    <h2>Send to your GP practice</h2>
+    <p style="margin-top:0">Your name and date of birth appear only on the summary, so the practice can match it to your record.</p>
+    <div class="who">
+      <div><label for="name">Name</label><input id="name" type="text" autocomplete="name"></div>
+      <div><label for="dob">Date of birth</label><input id="dob" type="text" placeholder="dd/mm/yyyy"></div>
+    </div>
+    <div class="actions">
+      <button type="button" class="btn" id="pdf">Download summary (PDF)</button>
+      <button type="button" class="btn secondary" id="share" hidden>Share summary</button>
+    </div>
+    <p class="foot" style="margin-top:0.6rem">Send the PDF in the way your practice asks, for example as a reply to their text message or through the NHS App.</p>
+  </div>
+
+  <div class="panel">
+    <button type="button" class="btn secondary" id="clear">Start a new diary</button>
+  </div>
+
+  <p class="foot">This diary records your readings; it doesn’t give medical advice about them, except for very high readings. If you feel unwell, contact your GP practice or NHS 111. In an emergency, call 999.</p>
+</div>
+
+<script src="jspdf.umd.min.js"></script>
+<script>
+  const KEY = "gp-bp-v1";
+  const HIGH_S = 180, HIGH_D = 120;
+  const REPEAT_WINDOW = 30 * 60 * 1000; // a second very high reading within 30 minutes
+
+  let data = { readings: [], name: "", dob: "" };
+  try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && Array.isArray(s.readings)) data = s; } catch (e) {}
+  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(data)); } catch (e) {} };
+
+  const $ = id => document.getElementById(id);
+  const pad = n => String(n).padStart(2, "0");
+  const localInput = d => d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()) + "T" + pad(d.getHours()) + ":" + pad(d.getMinutes());
+  const dayKey = ts => { const d = new Date(ts); return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()); };
+  const dayLabel = ts => new Date(ts).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" });
+  const timeLabel = ts => new Date(ts).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
+  const isHigh = r => r.s >= HIGH_S || r.d >= HIGH_D;
+
+  $("when").value = localInput(new Date());
+  $("name").value = data.name || "";
+  $("dob").value = data.dob || "";
+  $("name").addEventListener("input", e => { data.name = e.target.value; save(); });
+  $("dob").addEventListener("input", e => { data.dob = e.target.value; save(); });
+  if (!data.readings.length) $("how").open = true;
+
+  // ---------- Average: NICE method, leaving out the first day ----------
+  function summary() {
+    const rs = data.readings.slice().sort((a, b) => a.t - b.t);
+    if (!rs.length) return null;
+    const days = [...new Set(rs.map(r => dayKey(r.t)))];
+    const used = days.length > 1 ? rs.filter(r => dayKey(r.t) !== days[0]) : rs;
+    const avg = k => Math.round(used.reduce((a, r) => a + r[k], 0) / used.length);
+    const pulses = used.filter(r => r.p);
+    return {
+      s: avg("s"), d: avg("d"),
+      p: pulses.length ? Math.round(pulses.reduce((a, r) => a + r.p, 0) / pulses.length) : null,
+      n: used.length, days: days.length, excludedFirst: days.length > 1, first: rs[0].t, last: rs[rs.length - 1].t
+    };
+  }
+
+  function render() {
+    const s = summary();
+    const box = $("summary");
+    if (!s) {
+      box.innerHTML = "<h2>Your average</h2><p class='empty'>Your average will appear here once you’ve added readings.</p>";
+    } else {
+      box.innerHTML = "<h2>Your average</h2>" +
+        '<div class="avg">' + s.s + "/" + s.d + "</div>" +
+        (s.p ? '<p class="small">Average pulse ' + s.p + "</p>" : "") +
+        '<p class="small">From ' + s.n + " reading" + (s.n === 1 ? "" : "s") + " over " + s.days + " day" + (s.days === 1 ? "" : "s") +
+        (s.excludedFirst ? ", leaving out the first day as recommended" : "") + ".</p>" +
+        (s.days < 4 ? '<p class="small">Keep going: at least 4 days of readings, ideally 7, gives a reliable average.</p>' : "");
+    }
+
+    const list = $("readings");
+    const rs = data.readings.slice().sort((a, b) => a.t - b.t);
+    if (!rs.length) { list.innerHTML = '<p class="empty">No readings yet.</p>'; return; }
+    const days = [...new Set(rs.map(r => dayKey(r.t)))];
+    list.innerHTML = "";
+    days.forEach((k, i) => {
+      const div = document.createElement("div");
+      div.className = "day" + (i === 0 && days.length > 1 ? " first" : "");
+      const items = rs.filter(r => dayKey(r.t) === k);
+      div.innerHTML = "<h3>" + dayLabel(items[0].t) + "</h3>";
+      items.forEach(r => {
+        const row = document.createElement("div");
+        row.className = "reading";
+        row.innerHTML = '<span class="t">' + timeLabel(r.t) + '</span><span class="bp' + (isHigh(r) ? " high" : "") + '">' + r.s + "/" + r.d +
+          '</span><span class="pulse">' + (r.p ? "pulse " + r.p : "") + '</span><button type="button" class="del">Remove</button>';
+        row.querySelector(".del").addEventListener("click", () => {
+          if (!confirm("Remove the reading " + r.s + "/" + r.d + " at " + timeLabel(r.t) + "?")) return;
+          data.readings = data.readings.filter(x => x !== r);
+          save(); render();
+        });
+        div.append(row);
+      });
+      list.append(div);
+    });
+  }
+
+  // ---------- Adding a reading, with checks and safety advice ----------
+  const NINE = "<p><strong>Call 999</strong> if you also have chest pain, a severe headache, confusion, weakness, or problems with your vision or speech.</p>";
+  function showAlert(second) {
+    $("alert").innerHTML = '<div class="alert" role="alert">' + (second
+      ? "<p><strong>Your blood pressure is still very high.</strong></p><p>Please contact your GP practice today. If the practice is closed, call NHS 111.</p>"
+      : "<p><strong>This reading is very high.</strong></p><p>Please sit down, rest quietly for 5 minutes, then take your blood pressure again. Keep still and relaxed, with your arm supported and your feet flat on the floor.</p>") +
+      NINE + "</div>";
+    $("alert").scrollIntoView({ behavior: "smooth", block: "center" });
+  }
+
+  $("add").addEventListener("click", () => {
+    const s = Number($("sys").value), d = Number($("dia").value);
+    const p = $("pulse").value ? Number($("pulse").value) : null;
+    const t = $("when").value ? new Date($("when").value).getTime() : Date.now();
+    const err = $("error");
+    err.hidden = true;
+    if (!s || !d) { err.textContent = "Please enter both numbers."; err.hidden = false; return; }
+    if (s <= d) { err.textContent = "The top number should be higher than the bottom number. Please check them."; err.hidden = false; return; }
+    const odd = s < 70 || s > 260 || d < 35 || d > 160 || (p && (p < 30 || p > 220));
+    if (odd && !confirm(s + "/" + d + (p ? ", pulse " + p : "") + " looks unusual. Is it correct?")) return;
+
+    const reading = { s, d, p, t };
+    const earlierHigh = data.readings.some(r => isHigh(r) && t - r.t >= 0 && t - r.t <= REPEAT_WINDOW);
+    data.readings.push(reading);
+    save();
+    $("sys").value = ""; $("dia").value = ""; $("pulse").value = "";
+    $("when").value = localInput(new Date());
+    $("alert").innerHTML = "";
+    if (isHigh(reading)) showAlert(earlierHigh);
+    render();
+  });
+
+  // ---------- PDF summary ----------
+  function makePDF() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ unit: "mm", format: "a4" });
+    const s = summary();
+    const rs = data.readings.slice().sort((a, b) => a.t - b.t);
+    const L = 18;
+    let y = 20;
+    const dateShort = ts => new Date(ts).toLocaleDateString("en-GB");
+    doc.setFont("helvetica", "bold"); doc.setFontSize(16);
+    doc.text("Home blood pressure readings", L, y); y += 9;
+    doc.setFont("helvetica", "normal"); doc.setFontSize(11);
+    doc.text("Name: " + (data.name || "") , L, y);
+    doc.text("Date of birth: " + (data.dob || ""), 120, y); y += 6;
+    if (s) {
+      doc.text("Readings from " + dateShort(s.first) + " to " + dateShort(s.last), L, y); y += 10;
+      doc.setFont("helvetica", "bold"); doc.setFontSize(13);
+      doc.text("Average: " + s.s + "/" + s.d + " mmHg" + (s.p ? "    Average pulse: " + s.p : ""), L, y); y += 6;
+      doc.setFont("helvetica", "normal"); doc.setFontSize(10);
+      doc.text("Based on " + s.n + " readings over " + s.days + " days" + (s.excludedFirst ? ", excluding day 1 (NICE home monitoring method)." : "."), L, y); y += 10;
+    } else {
+      y += 6;
+    }
+    // Table
+    const cols = [L, L + 58, L + 82, L + 118, L + 148];
+    const header = () => {
+      doc.setFont("helvetica", "bold"); doc.setFontSize(10);
+      ["Date", "Time", "Blood pressure", "Pulse", ""].forEach((h, i) => doc.text(h, cols[i], y));
+      y += 2; doc.setLineWidth(0.3); doc.line(L, y, 192, y); y += 5;
+      doc.setFont("helvetica", "normal");
+    };
+    header();
+    let lastDay = "";
+    rs.forEach(r => {
+      if (y > 275) { doc.addPage(); y = 20; header(); lastDay = ""; }
+      const dk = dayKey(r.t);
+      doc.text(dk !== lastDay ? new Date(r.t).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short", year: "numeric" }) : "", cols[0], y);
+      doc.text(timeLabel(r.t), cols[1], y);
+      doc.text(r.s + "/" + r.d + (isHigh(r) ? " *" : ""), cols[2], y);
+      doc.text(r.p ? String(r.p) : "", cols[3], y);
+      lastDay = dk;
+      y += 2; doc.setDrawColor(210); doc.setLineWidth(0.1); doc.line(L, y, 192, y); doc.setDrawColor(0); y += 4.5;
+    });
+    y += 4;
+    doc.setFontSize(9);
+    if (rs.some(isHigh)) { doc.text("* Reading of 180/120 or above.", L, y); y += 5; }
+    doc.text("Readings entered by the patient using the home blood pressure diary at gphomescreen.org.uk/bp.", L, y); y += 4.5;
+    doc.text("Summary created " + new Date().toLocaleString("en-GB") + ".", L, y);
+    return doc;
+  }
+  const fileName = () => "Blood pressure readings" + (data.name ? " - " + data.name : "") + ".pdf";
+
+  $("pdf").addEventListener("click", () => {
+    if (!data.readings.length) { alert("Add some readings first."); return; }
+    makePDF().save(fileName());
+  });
+
+  // Share straight to email or messaging apps where the phone supports it
+  if (navigator.canShare && navigator.canShare({ files: [new File([""], "test.pdf", { type: "application/pdf" })] })) {
+    $("share").hidden = false;
+    $("share").addEventListener("click", async () => {
+      if (!data.readings.length) { alert("Add some readings first."); return; }
+      const blob = makePDF().output("blob");
+      try { await navigator.share({ files: [new File([blob], fileName(), { type: "application/pdf" })], title: "Blood pressure readings" }); }
+      catch (e) { /* user cancelled */ }
+    });
+  }
+
+  $("clear").addEventListener("click", () => {
+    if (!data.readings.length) return;
+    if (!confirm("Delete all your readings and start a new diary? Download your summary first if you still need it.")) return;
+    data.readings = [];
+    save(); $("alert").innerHTML = ""; render();
+  });
+
+  render();
+</script>
+</body>
+</html>

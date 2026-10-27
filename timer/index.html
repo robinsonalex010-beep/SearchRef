@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Consultation timer · GP homescreen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #f6f7f5; --field: #ffffff; --ink: #1e2a30; --muted: #5b6b72;
+    --rule: #d5dbd8; --accent: #1f5d6e; --accent-soft: #e3eef0;
+    --track: #e4e8e6; --warn: #c97c00; --over: #b83227;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --paper: #141a1d; --field: #1b2327; --ink: #e4e9ea; --muted: #97a6ab;
+      --rule: #2d383c; --accent: #85bccb; --accent-soft: #1d2d33;
+      --track: #26313a; --warn: #f0a83a; --over: #ff7a6b;
+      color-scheme: dark;
+    }
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background: var(--paper); color: var(--ink);
+    font-family: "Public Sans", "Segoe UI", Arial, sans-serif; line-height: 1.45;
+  }
+  a { color: var(--accent); }
+  :focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  button { font: inherit; cursor: pointer; }
+
+  .page { max-width: 64rem; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+  .home { display: inline-block; margin-bottom: 0.75rem; font-size: 0.9375rem; text-decoration: none; }
+  h1 { font-size: 1.75rem; font-weight: 600; line-height: 1.2; margin: 0 0 0.25rem; letter-spacing: -0.01em; }
+  .lead { color: var(--muted); margin: 0 0 1.5rem; max-width: 40rem; }
+
+  .layout { display: grid; grid-template-columns: minmax(18rem, 24rem) minmax(0, 1fr); gap: 2rem; align-items: start; }
+  @media (max-width: 52rem) { .layout { grid-template-columns: 1fr; } }
+
+  /* ----- Timer card ----- */
+  .card { background: var(--field); border: 1px solid var(--rule); border-radius: 8px; padding: 1rem 1rem 1.1rem; }
+  .presets { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-bottom: 0.75rem; }
+  .presets button {
+    font-size: 0.875rem; font-weight: 600; padding: 0.3rem 0.7rem; border-radius: 999px;
+    border: 1px solid var(--rule); background: var(--paper); color: var(--ink);
+  }
+  .presets button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--paper); }
+
+  .vis { display: grid; place-items: center; }
+  .rings { width: 100%; max-width: 17rem; height: auto; display: block; }
+  .rings circle { fill: none; }
+  .rings .track { stroke: var(--track); }
+  .rings .outer, .rings .inner { transition: stroke-dashoffset 0.25s linear, stroke 0.4s; stroke-linecap: butt; }
+  .rings text { fill: var(--ink); font-family: inherit; text-anchor: middle; }
+  .rings .big { font-size: 40px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .rings .small { font-size: 12.5px; fill: var(--muted); font-weight: 500; }
+
+  .bars { width: 100%; display: grid; gap: 0.6rem; padding: 0.25rem 0 0.5rem; }
+  .bar-label { display: flex; justify-content: space-between; font-size: 0.8125rem; color: var(--muted); font-weight: 600; margin-bottom: 0.2rem; }
+  .bar-label b { color: var(--ink); font-variant-numeric: tabular-nums; }
+  .bar { height: 1.4rem; background: var(--track); border-radius: 4px; overflow: hidden; }
+  .bar.thin { height: 0.9rem; }
+  .bar span { display: block; height: 100%; transition: width 0.25s linear, background 0.4s; }
+  .bars .big-time { font-size: 2.5rem; font-weight: 700; text-align: center; font-variant-numeric: tabular-nums; line-height: 1; }
+
+  .stage { margin-top: 0.75rem; padding: 0.6rem 0.75rem; border-radius: 6px; border-left: 6px solid var(--accent); background: var(--paper); }
+  .stage .now { display: flex; justify-content: space-between; align-items: baseline; gap: 0.5rem; }
+  .stage .name { font-size: 1.25rem; font-weight: 700; line-height: 1.2; }
+  .stage .left { font-size: 1.125rem; font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .stage .next { font-size: 0.875rem; color: var(--muted); margin-top: 0.15rem; }
+
+  .strip { display: flex; height: 0.75rem; margin-top: 0.75rem; border-radius: 3px; overflow: hidden; position: relative; }
+  .strip i { display: block; height: 100%; opacity: 0.35; transition: opacity 0.3s; }
+  .strip i.on { opacity: 1; }
+  .strip i.done { opacity: 0.15; }
+  .strip .mark { position: absolute; top: -2px; bottom: -2px; width: 2px; background: var(--ink); transition: left 0.25s linear; }
+
+  .controls { display: flex; gap: 0.5rem; margin-top: 0.9rem; flex-wrap: wrap; }
+  .controls button { border-radius: 6px; padding: 0.55rem 0.9rem; font-weight: 600; border: 1px solid var(--accent); }
+  #start { flex: 1 1 8rem; background: var(--accent); color: var(--paper); font-size: 1.05rem; }
+  #reset, #float { background: transparent; color: var(--accent); }
+  .keys { font-size: 0.8125rem; color: var(--muted); margin: 0.6rem 0 0; }
+
+  /* ----- Settings ----- */
+  .settings h2 { font-size: 1rem; font-weight: 600; margin: 0 0 0.5rem; }
+  .settings section { margin-bottom: 1.75rem; }
+  .settings label.lab { display: block; font-size: 0.875rem; font-weight: 600; margin-bottom: 0.2rem; }
+  .settings input[type="text"], .settings input[type="number"], .settings select {
+    font: inherit; color: var(--ink); background: var(--field);
+    border: 1px solid var(--rule); border-radius: 4px; padding: 0.35rem 0.5rem;
+  }
+  .row-inline { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: end; }
+  .stages { width: 100%; border-collapse: collapse; margin-top: 0.75rem; }
+  .stages th { font-size: 0.8125rem; color: var(--muted); text-align: left; font-weight: 600; padding: 0 0.25rem 0.3rem; }
+  .stages td { padding: 0.2rem 0.25rem; vertical-align: middle; }
+  .stages .letter { font-weight: 700; color: var(--muted); width: 1.5rem; }
+  .stages input[type="text"] { width: 100%; }
+  .stages input[type="number"] { width: 4.5rem; }
+  .stages input[type="color"] { width: 2.2rem; height: 2rem; padding: 0; border: 1px solid var(--rule); border-radius: 4px; background: none; cursor: pointer; }
+  .icon { border: 1px solid var(--rule); background: var(--field); color: var(--ink); border-radius: 4px; width: 2rem; height: 2rem; line-height: 1; }
+  .small-btn { border: 1px solid var(--accent); background: transparent; color: var(--accent); border-radius: 4px; padding: 0.35rem 0.75rem; font-weight: 600; font-size: 0.875rem; }
+  .total { font-weight: 600; margin-top: 0.5rem; }
+  .note { font-size: 0.875rem; color: var(--muted); margin: 0.4rem 0 0; }
+  .seg { display: inline-flex; border: 1px solid var(--rule); border-radius: 4px; overflow: hidden; }
+  .seg button { border: 0; background: var(--field); color: var(--ink); padding: 0.35rem 0.8rem; font-size: 0.9375rem; }
+  .seg button + button { border-left: 1px solid var(--rule); }
+  .seg button[aria-pressed="true"] { background: var(--accent); color: var(--paper); }
+  input[type="range"] { accent-color: var(--accent); }
+  .sound-grid { display: grid; grid-template-columns: auto 1fr auto; gap: 0.5rem 0.75rem; align-items: center; max-width: 30rem; }
+
+  /* Compact and floating versions */
+  body.compact .page { padding: 0.5rem; max-width: none; }
+  body.compact .home, body.compact h1, body.compact .lead, body.compact .settings, body.compact #float, body.compact .keys { display: none; }
+  body.compact .layout { display: block; }
+  body.compact .card { border: 0; padding: 0.25rem; background: transparent; }
+  body.pip { margin: 0; padding: 0.5rem; background: var(--paper); }
+  body.pip .card { border: 0; padding: 0.25rem; background: transparent; }
+  body.pip #float, body.pip .keys { display: none; }
+</style>
+</head>
+<body>
+<div class="page">
+  <a class="home" href="/">← GP homescreen</a>
+  <h1>Consultation timer</h1>
+  <p class="lead">A countdown for the whole consultation and for each stage, with colour-coded prompts. Pick a length, press start, and use “Float on top” to keep it visible over EMIS.</p>
+
+  <div class="layout">
+    <div class="card" id="card">
+      <div class="presets" id="presets" role="group" aria-label="Consultation type"></div>
+      <div class="vis" id="vis"></div>
+      <div class="stage" id="stage">
+        <div class="now"><span class="name" id="stage-name"></span><span class="left" id="stage-left"></span></div>
+        <div class="next" id="stage-next"></div>
+      </div>
+      <div class="strip" id="strip"></div>
+      <div class="controls">
+        <button type="button" id="start">Start</button>
+        <button type="button" id="reset">Reset</button>
+        <button type="button" id="float" title="Keep the timer in a small window on top of other programs">Float on top</button>
+      </div>
+      <p class="keys">Space starts and pauses; R resets.</p>
+    </div>
+
+    <div class="settings">
+      <section>
+        <h2>Stages</h2>
+        <div class="row-inline">
+          <div>
+            <label class="lab" for="preset-name">Consultation name</label>
+            <input type="text" id="preset-name">
+          </div>
+          <button type="button" class="small-btn" id="new-preset">Add a new type</button>
+          <button type="button" class="small-btn" id="delete-preset">Delete this type</button>
+        </div>
+        <table class="stages">
+          <thead><tr><th></th><th>Stage</th><th>Minutes</th><th>Colour</th><th></th></tr></thead>
+          <tbody id="stage-rows"></tbody>
+        </table>
+        <div class="row-inline" style="margin-top:0.5rem">
+          <button type="button" class="small-btn" id="add-stage">Add a stage</button>
+        </div>
+        <p class="total" id="total"></p>
+        <div class="row-inline">
+          <div>
+            <label class="lab" for="fit">Fit stages to a new total</label>
+            <input type="number" id="fit" min="1" max="120" step="1" style="width:5rem"> minutes
+          </div>
+          <button type="button" class="small-btn" id="fit-btn">Fit</button>
+        </div>
+        <p class="note">Fitting keeps the same proportions; you can then adjust stages individually. Minutes can be in halves or quarters, e.g. 0.5.</p>
+      </section>
+
+      <section>
+        <h2>Display</h2>
+        <div class="seg" id="display" role="group" aria-label="Display style">
+          <button type="button" data-v="rings">Rings</button><button type="button" data-v="bars">Bars</button>
+        </div>
+      </section>
+
+      <section>
+        <h2>Sounds</h2>
+        <div class="sound-grid">
+          <label class="lab" for="stage-sound" style="margin:0">Each new stage</label>
+          <select id="stage-sound"></select>
+          <button type="button" class="small-btn" data-test="stage">Test</button>
+          <label class="lab" for="end-sound" style="margin:0">End of consultation</label>
+          <select id="end-sound"></select>
+          <button type="button" class="small-btn" data-test="end">Test</button>
+          <label class="lab" for="volume" style="margin:0">Volume</label>
+          <input type="range" id="volume" min="0" max="1" step="0.05">
+          <span></span>
+        </div>
+        <div style="margin-top:0.75rem">
+          <label class="lab" for="own-sound">Your own sound</label>
+          <input type="file" id="own-sound" accept="audio/*">
+          <p class="note" id="own-note">Choose a short audio file, then pick “Your own sound” above.</p>
+        </div>
+      </section>
+
+      <section>
+        <h2>Reset</h2>
+        <button type="button" class="small-btn" id="restore">Restore the original settings</button>
+        <p class="note">Your settings are saved in this browser on this computer. Some NHS computers clear browser data at log-off, in which case the original settings come back.</p>
+      </section>
+    </div>
+  </div>
+</div>
+
+<script>
+  /* ===== Default consultation types: edit here to change what everyone starts with ===== */
+  const DEFAULTS = {
+    presets: [
+      { name: "Face to face, 15 min", stages: [
+        { name: "Review notes", minutes: 2, colour: "#5b7083" },
+        { name: "Introduction", minutes: 1, colour: "#2a8a99" },
+        { name: "Patient’s own words", minutes: 2, colour: "#3a6fc4" },
+        { name: "Specific questions", minutes: 2, colour: "#7a52b8" },
+        { name: "Examination", minutes: 3, colour: "#b3489a" },
+        { name: "Diagnosis", minutes: 1, colour: "#d0603a" },
+        { name: "Management discussion", minutes: 2, colour: "#c4950f" },
+        { name: "Summary and close", minutes: 1, colour: "#4b9a4a" },
+        { name: "Documentation", minutes: 1, colour: "#8a6a4f" }
+      ]},
+      { name: "Phone, 10 min", stages: [
+        { name: "Review notes", minutes: 1, colour: "#5b7083" },
+        { name: "Introduction", minutes: 0.5, colour: "#2a8a99" },
+        { name: "Patient’s own words", minutes: 2, colour: "#3a6fc4" },
+        { name: "Specific questions", minutes: 2, colour: "#7a52b8" },
+        { name: "Diagnosis", minutes: 1, colour: "#d0603a" },
+        { name: "Management discussion", minutes: 2, colour: "#c4950f" },
+        { name: "Summary and close", minutes: 1, colour: "#4b9a4a" },
+        { name: "Documentation", minutes: 0.5, colour: "#8a6a4f" }
+      ]}
+    ],
+    current: 0,
+    display: "rings",
+    stageSound: "chime",
+    endSound: "bell",
+    volume: 0.6
+  };
+  const PALETTE = ["#5b7083", "#2a8a99", "#3a6fc4", "#7a52b8", "#b3489a", "#d0603a", "#c4950f", "#4b9a4a", "#8a6a4f"];
+  const SOUNDS = [["off", "Off"], ["chime", "Chime"], ["beep", "Soft beep"], ["bell", "Bell"], ["own", "Your own sound"]];
+  const KEY = "gp-timer-v1";
+  const WARN_MS = 2 * 60 * 1000;
+
+  // ---------- Settings ----------
+  let S;
+  try { S = JSON.parse(localStorage.getItem(KEY)); } catch (e) {}
+  if (!S || !Array.isArray(S.presets) || !S.presets.length) S = structuredClone(DEFAULTS);
+  let ownSound = null;
+  try { ownSound = localStorage.getItem(KEY + "-sound"); } catch (e) {}
+
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
+  const preset = () => S.presets[Math.min(S.current, S.presets.length - 1)];
+
+  // ---------- Elements (kept as references so they still work in the floating window) ----------
+  const $ = id => document.getElementById(id);
+  const E = {
+    card: $("card"), presets: $("presets"), vis: $("vis"), stage: $("stage"), name: $("stage-name"),
+    left: $("stage-left"), next: $("stage-next"), strip: $("strip"), start: $("start"),
+    reset: $("reset"), float: $("float")
+  };
+
+  // ---------- Timing ----------
+  let running = false, startedAt = 0, banked = 0, lastIndex = -1, endPlayed = false;
+  const elapsed = () => banked + (running ? Date.now() - startedAt : 0);
+
+  function schedule() {
+    let t = 0;
+    return preset().stages.map(s => {
+      const start = t;
+      t += Math.max(0, Number(s.minutes) || 0) * 60000;
+      return { ...s, start, end: t };
+    });
+  }
+
+  function fmt(ms) {
+    const neg = ms < 0;
+    const total = Math.ceil(Math.abs(ms) / 1000);
+    const m = Math.floor(total / 60), s = total % 60;
+    return (neg ? "+" : "") + m + ":" + String(s).padStart(2, "0");
+  }
+  const letter = i => String.fromCharCode(65 + i);
+
+  // ---------- Drawing ----------
+  const R_OUT = 104, R_IN = 82, SW = 16;
+  const C_OUT = 2 * Math.PI * R_OUT, C_IN = 2 * Math.PI * R_IN;
+  let V = {};
+
+  function buildVis() {
+    if (S.display === "bars") {
+      E.vis.innerHTML =
+        '<div class="bars">' +
+        '<div class="big-time" data-k="big"></div>' +
+        '<div><div class="bar-label"><span>Consultation</span><b data-k="overall"></b></div><div class="bar"><span data-k="ob"></span></div></div>' +
+        '<div><div class="bar-label"><span>This stage</span><b data-k="stage"></b></div><div class="bar thin"><span data-k="sb"></span></div></div>' +
+        '</div>';
+    } else {
+      E.vis.innerHTML =
+        '<svg class="rings" viewBox="0 0 240 240" role="img" aria-label="Time remaining">' +
+        '<circle class="track" cx="120" cy="120" r="' + R_OUT + '" stroke-width="' + SW + '"/>' +
+        '<circle class="outer" data-k="ob" cx="120" cy="120" r="' + R_OUT + '" stroke-width="' + SW + '" stroke-dasharray="' + C_OUT + '" transform="rotate(-90 120 120)"/>' +
+        '<circle class="track" cx="120" cy="120" r="' + R_IN + '" stroke-width="' + (SW - 2) + '"/>' +
+        '<circle class="inner" data-k="sb" cx="120" cy="120" r="' + R_IN + '" stroke-width="' + (SW - 2) + '" stroke-dasharray="' + C_IN + '" transform="rotate(-90 120 120)"/>' +
+        '<text class="big" data-k="big" x="120" y="128"></text>' +
+        '<text class="small" data-k="sub" x="120" y="152"></text>' +
+        '</svg>';
+    }
+    V = {};
+    E.vis.querySelectorAll("[data-k]").forEach(el => { V[el.dataset.k] = el; });
+  }
+
+  function buildStrip(sched) {
+    const total = sched.length ? sched[sched.length - 1].end : 0;
+    E.strip.innerHTML = "";
+    sched.forEach((s, i) => {
+      const seg = document.createElement("i");
+      seg.style.width = total ? (100 * (s.end - s.start) / total) + "%" : "0";
+      seg.style.background = s.colour;
+      seg.title = letter(i) + " · " + s.name;
+      E.strip.append(seg);
+    });
+    const mark = document.createElement("span");
+    mark.className = "mark";
+    E.strip.append(mark);
+  }
+
+  function buildPresetButtons() {
+    E.presets.innerHTML = "";
+    S.presets.forEach((p, i) => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.textContent = p.name || "Untitled";
+      b.setAttribute("aria-pressed", i === S.current ? "true" : "false");
+      b.addEventListener("click", () => { S.current = i; save(); resetTimer(); rebuildAll(); });
+      E.presets.append(b);
+    });
+  }
+
+  function render() {
+    const sched = schedule();
+    const total = sched.length ? sched[sched.length - 1].end : 0;
+    const t = elapsed();
+    const remaining = total - t;
+    let idx = sched.findIndex(s => t < s.end);
+    const over = idx === -1 && total > 0 && t >= total;
+    if (idx === -1) idx = sched.length;
+
+    // Sounds on stage change and at the end
+    if (running && idx !== lastIndex) {
+      if (idx < sched.length && lastIndex !== -1) play(S.stageSound);
+      lastIndex = idx;
+    }
+    if (running && over && !endPlayed) { endPlayed = true; play(S.endSound); }
+
+    const overallFrac = total ? Math.max(0, remaining) / total : 0;
+    const outerColour = over ? "var(--over)" : remaining <= WARN_MS && t > 0 ? "var(--warn)" : "var(--accent)";
+    const cur = sched[idx];
+    const stageRemaining = cur ? cur.end - t : 0;
+    const stageFrac = cur ? Math.max(0, stageRemaining) / (cur.end - cur.start || 1) : 0;
+    const stageColour = cur ? cur.colour : "var(--over)";
+
+    if (S.display === "bars") {
+      V.big.textContent = fmt(over ? remaining : Math.max(0, remaining));
+      V.big.style.color = over ? "var(--over)" : "";
+      V.overall.textContent = over ? "over by " + fmt(-remaining).replace("+", "") : fmt(remaining) + " left";
+      V.stage.textContent = cur ? fmt(stageRemaining) + " left" : "–";
+      V.ob.style.width = (over ? 100 : overallFrac * 100) + "%";
+      V.ob.style.background = outerColour;
+      V.sb.style.width = (stageFrac * 100) + "%";
+      V.sb.style.background = stageColour;
+    } else {
+      V.ob.style.strokeDashoffset = over ? 0 : C_OUT * (1 - overallFrac);
+      V.ob.style.stroke = outerColour;
+      V.sb.style.strokeDashoffset = C_IN * (1 - stageFrac);
+      V.sb.style.stroke = stageColour;
+      V.big.textContent = fmt(over ? remaining : Math.max(0, remaining));
+      V.big.style.fill = over ? "var(--over)" : "";
+      V.sub.textContent = over ? "over time" : t === 0 ? "consultation" : "left";
+    }
+
+    if (cur) {
+      E.name.textContent = letter(idx) + " · " + cur.name;
+      E.left.textContent = fmt(stageRemaining);
+      E.stage.style.borderLeftColor = cur.colour;
+      const nx = sched[idx + 1];
+      E.next.textContent = nx ? "Next: " + letter(idx + 1) + " · " + nx.name : "Last stage";
+    } else {
+      E.name.textContent = total ? "Time’s up" : "No stages set";
+      E.left.textContent = total ? fmt(remaining) : "";
+      E.stage.style.borderLeftColor = "var(--over)";
+      E.next.textContent = total ? "Over the planned time" : "Add stages in the settings";
+    }
+
+    const segs = E.strip.querySelectorAll("i");
+    segs.forEach((s, i) => { s.className = i === idx ? "on" : i < idx ? "done" : ""; });
+    const mark = E.strip.querySelector(".mark");
+    if (mark) mark.style.left = (total ? Math.min(100, (100 * t) / total) : 0) + "%";
+
+    E.start.textContent = running ? "Pause" : t > 0 ? "Resume" : "Start";
+  }
+
+  // ---------- Controls ----------
+  function startPause() {
+    unlockAudio();
+    if (running) { banked = elapsed(); running = false; }
+    else { startedAt = Date.now(); running = true; if (lastIndex === -1) lastIndex = 0; }
+    render();
+  }
+  function resetTimer() {
+    running = false; banked = 0; lastIndex = -1; endPlayed = false;
+    render();
+  }
+  E.start.addEventListener("click", startPause);
+  E.reset.addEventListener("click", resetTimer);
+  document.addEventListener("keydown", e => {
+    const tag = (e.target && e.target.tagName) || "";
+    if (/INPUT|SELECT|TEXTAREA|BUTTON/.test(tag)) return;
+    if (e.code === "Space") { e.preventDefault(); startPause(); }
+    if (e.key === "r" || e.key === "R") resetTimer();
+  });
+  setInterval(render, 200);
+
+  // ---------- Sound (made in the browser; no files needed) ----------
+  let ctx = null;
+  function unlockAudio() {
+    if (!ctx) { try { ctx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
+    if (ctx && ctx.state === "suspended") ctx.resume();
+  }
+  function tone(freq, start, dur, type, gain) {
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = type; o.frequency.value = freq;
+    const v = gain * S.volume;
+    g.gain.setValueAtTime(0.0001, ctx.currentTime + start);
+    g.gain.exponentialRampToValueAtTime(Math.max(v, 0.0002), ctx.currentTime + start + 0.015);
+    g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + start + dur);
+    o.connect(g).connect(ctx.destination);
+    o.start(ctx.currentTime + start); o.stop(ctx.currentTime + start + dur + 0.05);
+  }
+  function play(kind) {
+    if (kind === "off" || S.volume <= 0) return;
+    if (kind === "own") {
+      if (!ownSound) return;
+      const a = new Audio(ownSound); a.volume = S.volume; a.play().catch(() => {});
+      return;
+    }
+    unlockAudio();
+    if (!ctx) return;
+    if (kind === "chime") { tone(880, 0, 0.6, "sine", 0.35); tone(1318.5, 0.18, 0.9, "sine", 0.3); }
+    if (kind === "beep") { tone(660, 0, 0.18, "sine", 0.3); }
+    if (kind === "bell") {
+      [[523.25, 0.4], [1046.5, 0.18], [1568, 0.1], [2093, 0.06]].forEach(([f, g]) => tone(f, 0, 2.2, "sine", g));
+      [[523.25, 0.4], [1046.5, 0.18], [1568, 0.1]].forEach(([f, g]) => tone(f, 0.6, 2.2, "sine", g));
+    }
+  }
+
+  // ---------- Settings panel ----------
+  const rows = $("stage-rows");
+
+  function renderSettings() {
+    const p = preset();
+    $("preset-name").value = p.name;
+    rows.innerHTML = "";
+    p.stages.forEach((s, i) => {
+      const tr = document.createElement("tr");
+      tr.innerHTML =
+        '<td class="letter">' + letter(i) + '</td>' +
+        '<td><input type="text" aria-label="Stage ' + letter(i) + ' name"></td>' +
+        '<td><input type="number" min="0" max="60" step="0.25" aria-label="Stage ' + letter(i) + ' minutes"></td>' +
+        '<td><input type="color" aria-label="Stage ' + letter(i) + ' colour"></td>' +
+        '<td style="white-space:nowrap"><button type="button" class="icon" title="Move up" aria-label="Move up">↑</button> ' +
+        '<button type="button" class="icon" title="Move down" aria-label="Move down">↓</button> ' +
+        '<button type="button" class="icon" title="Remove" aria-label="Remove stage">×</button></td>';
+      const [nameIn, minIn, colIn] = tr.querySelectorAll("input");
+      nameIn.value = s.name; minIn.value = s.minutes; colIn.value = s.colour;
+      nameIn.addEventListener("input", () => { s.name = nameIn.value; changed(false); });
+      minIn.addEventListener("input", () => { s.minutes = Math.max(0, Number(minIn.value) || 0); changed(false); });
+      colIn.addEventListener("input", () => { s.colour = colIn.value; changed(false); });
+      const [up, down, del] = tr.querySelectorAll("button");
+      up.addEventListener("click", () => { if (i > 0) { p.stages.splice(i - 1, 0, p.stages.splice(i, 1)[0]); changed(true); } });
+      down.addEventListener("click", () => { if (i < p.stages.length - 1) { p.stages.splice(i + 1, 0, p.stages.splice(i, 1)[0]); changed(true); } });
+      del.addEventListener("click", () => { p.stages.splice(i, 1); changed(true); });
+      rows.append(tr);
+    });
+    const total = p.stages.reduce((a, s) => a + (Number(s.minutes) || 0), 0);
+    $("total").textContent = "Total: " + (Math.round(total * 100) / 100) + " minutes";
+    $("fit").value = Math.round(total);
+    $("delete-preset").disabled = S.presets.length < 2;
+
+    document.querySelectorAll("#display button").forEach(b => b.setAttribute("aria-pressed", b.dataset.v === S.display ? "true" : "false"));
+    $("stage-sound").value = S.stageSound;
+    $("end-sound").value = S.endSound;
+    $("volume").value = S.volume;
+  }
+
+  function changed(rebuildRows) {
+    save();
+    buildPresetButtons();
+    buildStrip(schedule());
+    if (rebuildRows) renderSettings();
+    else {
+      const total = preset().stages.reduce((a, s) => a + (Number(s.minutes) || 0), 0);
+      $("total").textContent = "Total: " + (Math.round(total * 100) / 100) + " minutes";
+    }
+    render();
+  }
+
+  function rebuildAll() {
+    buildPresetButtons();
+    buildVis();
+    buildStrip(schedule());
+    renderSettings();
+    render();
+  }
+
+  $("preset-name").addEventListener("input", e => { preset().name = e.target.value; save(); buildPresetButtons(); });
+  $("add-stage").addEventListener("click", () => {
+    const st = preset().stages;
+    st.push({ name: "New stage", minutes: 1, colour: PALETTE[st.length % PALETTE.length] });
+    changed(true);
+  });
+  $("new-preset").addEventListener("click", () => {
+    const copy = structuredClone(preset());
+    copy.name = "New consultation type";
+    S.presets.push(copy);
+    S.current = S.presets.length - 1;
+    save(); resetTimer(); rebuildAll();
+    $("preset-name").focus(); $("preset-name").select();
+  });
+  $("delete-preset").addEventListener("click", () => {
+    if (S.presets.length < 2) return;
+    if (!confirm("Delete “" + preset().name + "”?")) return;
+    S.presets.splice(S.current, 1);
+    S.current = 0;
+    save(); resetTimer(); rebuildAll();
+  });
+  $("fit-btn").addEventListener("click", () => {
+    const target = Number($("fit").value);
+    const st = preset().stages;
+    const total = st.reduce((a, s) => a + (Number(s.minutes) || 0), 0);
+    if (!target || !total) return;
+    st.forEach(s => { s.minutes = Math.round((s.minutes * target / total) * 4) / 4; });
+    // Put any rounding difference on the longest stage
+    const diff = target - st.reduce((a, s) => a + s.minutes, 0);
+    if (diff && st.length) { const big = st.reduce((a, s) => (s.minutes > a.minutes ? s : a), st[0]); big.minutes = Math.max(0, big.minutes + diff); }
+    changed(true);
+  });
+  document.querySelectorAll("#display button").forEach(b => b.addEventListener("click", () => {
+    S.display = b.dataset.v; save(); buildVis(); renderSettings(); render();
+  }));
+
+  ["stage-sound", "end-sound"].forEach(id => {
+    const sel = $(id);
+    SOUNDS.forEach(([v, label]) => sel.append(new Option(label, v)));
+    sel.addEventListener("change", () => {
+      if (id === "stage-sound") S.stageSound = sel.value; else S.endSound = sel.value;
+      save();
+    });
+  });
+  $("volume").addEventListener("input", e => { S.volume = Number(e.target.value); save(); });
+  document.querySelectorAll("[data-test]").forEach(b => b.addEventListener("click", () => {
+    unlockAudio();
+    play(b.dataset.test === "stage" ? S.stageSound : S.endSound);
+  }));
+
+  $("own-sound").addEventListener("change", e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      ownSound = reader.result;
+      let kept = false;
+      if (file.size < 1500000) { try { localStorage.setItem(KEY + "-sound", ownSound); kept = true; } catch (err) {} }
+      $("own-note").textContent = kept
+        ? "Loaded “" + file.name + "”. Pick “Your own sound” above to use it."
+        : "Loaded “" + file.name + "” for now; it’s too large to remember next time, so a file under 1.5 MB works best.";
+    };
+    reader.readAsDataURL(file);
+  });
+  if (ownSound) $("own-note").textContent = "Your own sound is loaded. Pick “Your own sound” above to use it.";
+
+  $("restore").addEventListener("click", () => {
+    if (!confirm("Restore the original consultation types, stages and sounds?")) return;
+    S = structuredClone(DEFAULTS);
+    save(); resetTimer(); rebuildAll();
+  });
+
+  // ---------- Float on top ----------
+  E.float.addEventListener("click", async () => {
+    if ("documentPictureInPicture" in window) {
+      try {
+        const pip = await documentPictureInPicture.requestWindow({ width: 320, height: 470 });
+        [...document.styleSheets].forEach(ss => {
+          try {
+            const st = pip.document.createElement("style");
+            st.textContent = [...ss.cssRules].map(r => r.cssText).join("\n");
+            pip.document.head.append(st);
+          } catch (err) {
+            if (ss.href) { const l = pip.document.createElement("link"); l.rel = "stylesheet"; l.href = ss.href; pip.document.head.append(l); }
+          }
+        });
+        pip.document.title = "Consultation timer";
+        pip.document.body.classList.add("pip");
+        const holder = document.createElement("div");
+        E.card.before(holder);
+        pip.document.body.append(E.card);
+        pip.document.addEventListener("keydown", e => {
+          if (e.code === "Space") { e.preventDefault(); startPause(); }
+          if (e.key === "r" || e.key === "R") resetTimer();
+        });
+        pip.addEventListener("pagehide", () => { holder.replaceWith(E.card); });
+        return;
+      } catch (err) { /* fall through to a normal small window */ }
+    }
+    window.open(location.pathname + "?compact=1", "gp-consult-timer", "width=340,height=520");
+  });
+
+  if (new URLSearchParams(location.search).get("compact") === "1") document.body.classList.add("compact");
+
+  rebuildAll();
+</script>
+</body>
+</html>

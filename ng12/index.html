@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NG12 quick reference · GP homescreen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #f6f7f5; --field: #ffffff; --ink: #1e2a30; --muted: #5b6b72;
+    --rule: #d5dbd8; --accent: #1f5d6e; --accent-soft: #e3eef0;
+    --imm: #b3261e; --h48: #b85400; --w2: #8a5a00; --oth: #2f6b8f;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --paper: #141a1d; --field: #1b2327; --ink: #e4e9ea; --muted: #97a6ab;
+      --rule: #2d383c; --accent: #85bccb; --accent-soft: #1d2d33;
+      --imm: #ff8a80; --h48: #ffb067; --w2: #e3c64f; --oth: #8ec3e6;
+      color-scheme: dark;
+    }
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background: var(--paper); color: var(--ink);
+    font-family: "Public Sans", "Segoe UI", Arial, sans-serif; font-size: 15px; line-height: 1.45;
+  }
+  a { color: var(--accent); }
+  :focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  .page { max-width: 36rem; margin: 0 auto; padding: 1.25rem 1rem 3rem; }
+  .home { display: inline-block; margin-bottom: 0.5rem; font-size: 0.9375rem; text-decoration: none; }
+  .head { display: flex; align-items: baseline; justify-content: space-between; gap: 0.75rem; flex-wrap: wrap; }
+  h1 { font-size: 1.4rem; font-weight: 700; line-height: 1.2; margin: 0; }
+  .pop { font: inherit; font-size: 0.875rem; font-weight: 600; color: var(--accent); background: transparent; border: 1px solid var(--accent); border-radius: 4px; padding: 0.3rem 0.65rem; cursor: pointer; }
+  .version { font-size: 0.8125rem; color: var(--muted); margin: 0.3rem 0 0.9rem; }
+
+  .searchbar { position: sticky; top: 0; z-index: 5; background: var(--paper); padding: 0.4rem 0 0.6rem; }
+  #q {
+    width: 100%; font: inherit; font-size: 1.125rem; color: var(--ink); background: var(--field);
+    border: 0; border-bottom: 3px solid var(--accent); padding: 0.6rem 0.75rem;
+  }
+  #q:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--accent-soft); }
+  .hint { font-size: 0.8125rem; color: var(--muted); margin: 0.35rem 0 0; }
+
+  .card { background: var(--field); border: 1px solid var(--rule); border-radius: 6px; padding: 0.75rem 0.85rem; margin-top: 0.75rem; }
+  .card h2 { font-size: 1.05rem; margin: 0; line-height: 1.25; }
+  .card .grp { font-size: 0.75rem; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
+  .rule { border-top: 1px solid var(--rule); padding: 0.55rem 0 0.1rem; margin-top: 0.55rem; }
+  .rule:first-of-type { border-top: 0; margin-top: 0.35rem; }
+  .tier { display: inline-block; font-size: 0.75rem; font-weight: 700; border-radius: 3px; padding: 0.05rem 0.4rem; border: 1.5px solid currentColor; margin-right: 0.35rem; vertical-align: 1px; }
+  .t-imm { color: var(--imm); } .t-48h { color: var(--h48); } .t-2w { color: var(--w2); } .t-oth { color: var(--oth); }
+  .act { font-weight: 600; }
+  .when { font-size: 0.875rem; color: var(--ink); margin-top: 0.2rem; }
+  .when b { font-weight: 700; }
+  .when .lbl { color: var(--muted); }
+  .note { font-size: 0.8125rem; color: var(--muted); margin-top: 0.2rem; }
+  .src { font-size: 0.6875rem; font-weight: 700; color: var(--muted); border: 1px solid var(--rule); border-radius: 3px; padding: 0 0.3rem; margin-left: 0.3rem; }
+  .via { font-size: 0.8125rem; color: var(--muted); margin: 0.2rem 0 0; }
+
+  .nores { background: var(--accent-soft); border-left: 3px solid var(--accent); padding: 0.75rem 0.9rem; margin-top: 0.75rem; }
+  .nores p { margin: 0 0 0.4rem; } .nores p:last-child { margin: 0; }
+  .more { font: inherit; font-weight: 600; color: var(--accent); background: none; border: 0; padding: 0.6rem 0; cursor: pointer; }
+  .sub { font-size: 0.875rem; font-weight: 600; color: var(--muted); margin: 1rem 0 0; }
+
+  details.browse { margin-top: 1.5rem; }
+  details.browse > summary { font-weight: 600; cursor: pointer; }
+  .group { margin-top: 0.75rem; }
+  .group h3 { font-size: 0.8125rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; margin: 0 0 0.3rem; }
+  .chips { display: flex; flex-wrap: wrap; gap: 0.3rem; }
+  .chips button { font: inherit; font-size: 0.8125rem; border: 1px solid var(--rule); background: var(--field); color: var(--accent); border-radius: 999px; padding: 0.15rem 0.6rem; cursor: pointer; }
+  .chips button:hover { border-color: var(--accent); }
+
+  .foot { font-size: 0.8125rem; color: var(--muted); margin-top: 2rem; border-top: 1px solid var(--rule); padding-top: 0.75rem; }
+  .foot p { margin: 0 0 0.5rem; }
+  .foot ul { margin: 0.25rem 0 0; padding-left: 1.1rem; }
+
+  body.compact .home { display: none; }
+  body.compact .pop { display: none; }
+  body.compact .page { padding-top: 0.5rem; }
+</style>
+</head>
+<body>
+<div class="page">
+  <a class="home" href="/">← GP homescreen</a>
+  <div class="head">
+    <h1>NG12 quick reference</h1>
+    <button type="button" class="pop" id="pop" title="Open in a narrow window to sit beside EMIS">Pop out</button>
+  </div>
+  <p class="version">NICE NG12 suspected cancer recognition and referral, updated April 2026.</p>
+
+  <div class="searchbar">
+    <label for="q" style="position:absolute;left:-9999px">Search a symptom, sign or result</label>
+    <input id="q" type="search" autocomplete="off" spellcheck="false" placeholder="Symptom, sign or result, e.g. haematuria">
+    <p class="hint">Shows what NG12 recommends for a finding, with its age and other criteria as written.</p>
+  </div>
+
+  <div id="out"></div>
+
+  <details class="browse" id="browse">
+    <summary>Browse all findings by area</summary>
+    <div id="groups"></div>
+  </details>
+
+  <div class="foot">
+    <p>Recommendations transcribed from NICE NG12 (updated April 2026) and the Cancer Research UK body poster (May 2026). Items tagged CG104 come from NICE’s guideline on metastatic disease of unknown primary; CCLG from the Children’s Cancer and Leukaemia Group’s NICE-endorsed referral guidance for children; Not NG12 marks usual practice for imaging findings NG12 doesn’t cover. NG12 assumes symptoms are unexplained.</p>
+    <p>A quick reference, not a substitute for the guideline: check against the source and use clinical judgement.</p>
+    <ul id="res"></ul>
+  </div>
+</div>
+
+<script>
+
+// NG12 findings vocabulary and rules, transcribed from NICE NG12 (last updated 15 April 2026)
+// and the Cancer Research UK body poster (May 2026). Check against source.
+const GROUPS = [
+ ["ugi","Upper GI"],["lgi","Lower GI and abdomen"],["gen","Blood and general"],
+ ["chest","Chest"],["hn","Head and neck"],["breast","Breast"],["gyn","Gynaecological"],
+ ["uro","Urological"],["skin","Skin"],["msk","Bones, lumps and neurology"],
+ ["res","Test and imaging results"],["cyp","Children and young people"]
+];
+// id, group, label, phrases a clinician might write (matched by word, with stems and typos tolerated)
+const FINDINGS = [
+ ["dysphagia","ugi","Dysphagia (food sticking)",["dysphagia","swallowing difficulty","difficulty swallowing","trouble swallowing","food sticking","food stuck","swallow"]],
+ ["reflux","ugi","Reflux",["reflux","heartburn","gord","gerd","regurgitation","acid"]],
+ ["dyspepsia","ugi","Dyspepsia",["dyspepsia","dyspeptic","indigestion"]],
+ ["dyspepsia_res","ugi","Dyspepsia not responding to treatment",["unresponsive ppi","ppi unresponsive","refractory dyspepsia","ppi refractory","ppi resistant","failed ppi","unresponsive omeprazole","unresponsive lansoprazole","unresponsive treatment dyspepsia","dyspepsia unresponsive"]],
+ ["upper_abdo_pain","ugi","Upper abdominal pain",["epigastric pain","epigastric discomfort","epigastric burning","epigastric ache","epigastralgia","upper abdominal pain","upper abdominal discomfort","ruq pain","luq pain","right upper quadrant pain","left upper quadrant pain","upper stomach pain","upper tummy pain"]],
+ ["nv","ugi","Nausea or vomiting",["nausea","nauseous","nauseated","vomiting","vomit","emesis","being sick"]],
+ ["haematemesis","ugi","Haematemesis",["haematemesis","hematemesis","vomiting blood","coffee ground","blood vomit"]],
+ ["jaundice","ugi","Jaundice",["jaundice","jaundiced","icterus","icteric","yellow skin","yellow sclera","yellow eyes"]],
+ ["mass_liver","ugi","Upper abdominal mass (liver or gallbladder)",["hepatomegaly","liver mass","enlarged liver","palpable liver","gallbladder mass","palpable gallbladder","ruq mass","right upper quadrant mass"]],
+ ["mass_stomach","ugi","Upper abdominal mass (stomach)",["epigastric mass","stomach mass","gastric mass","upper abdominal mass","epigastric lump"]],
+ ["abdo_pain","lgi","Abdominal or pelvic pain",["abdominal pain","abdominal discomfort","abdominal cramps","lower abdominal pain","tummy pain","stomach pain","stomach ache","pelvic pain","iliac fossa pain","lif pain","rif pain","colicky pain"]],
+ ["abdo_mass","lgi","Abdominal mass",["abdominal mass","abdominal lump","mass abdomen","palpable mass abdomen","tummy lump"]],
+ ["bowel","lgi","Change in bowel habit",["change bowel habit","altered bowel habit","bowel habit","bowel change","diarrhoea","diarrhea","constipation","constipated","loose stools","looser stools"]],
+ ["rectal_bleed","lgi","Rectal bleeding",["rectal bleeding","rectal blood","bleeding rectal","blood stool","blood poo","bright red blood","fresh blood","haematochezia","hematochezia"]],
+ ["rectal_mass","lgi","Rectal mass",["rectal mass","rectal lump","mass rectal exam"]],
+ ["anal","lgi","Anal mass or ulceration (unexplained)",["anal lump","anal mass","anal ulcer","anal ulceration","anal lesion","anal growth","anal sore","perianal lump","perianal mass","perianal ulcer"]],
+ ["distension","lgi","Bloating or distension (persistent or over 12 times a month)",["bloating","bloated","distension","distended","abdominal swelling","swollen abdomen","swollen tummy"]],
+ ["satiety","lgi","Early satiety (persistent or over 12 times a month)",["early satiety","satiety","full quickly","early fullness","feeling full"]],
+ ["ibs_new","lgi","New IBS-type symptoms in the last 12 months",["new ibs","ibs symptoms","ibs type","ibs like","new onset ibs"]],
+ ["ascites","lgi","Ascites",["ascites","shifting dullness"]],
+ ["pelvic_mass","lgi","Pelvic or abdominal mass, not obviously fibroids (women)",["pelvic mass","adnexal mass","ovarian mass","pelvic lump"]],
+ ["weight_loss","gen","Unexplained weight loss",["weight loss","losing weight","lost weight","weight dropping","lost kg","lost stone","lost lbs","cachexia","cachectic"]],
+ ["appetite","gen","Appetite loss",["loss appetite","appetite loss","poor appetite","reduced appetite","decreased appetite","off food","anorexia"]],
+ ["fatigue","gen","Persistent fatigue",["fatigue","tired","tiredness","lethargy","lethargic","exhaustion","exhausted","low energy","tatt","malaise"]],
+ ["fever","gen","Unexplained fever",["fever","fevers","pyrexia","pyrexial","febrile","temperature","temperatures","puo"]],
+ ["sweats","gen","Night sweats",["night sweats","night sweating","sweats","sweating","drenching sweats"]],
+ ["pruritus","gen","Pruritus",["pruritus","itch","itching","itchy"]],
+ ["pallor","gen","Pallor",["pallor","pale"]],
+ ["infection","gen","Persistent or recurrent infection",["recurrent infections","persistent infection","frequent infections","repeated infections"]],
+ ["bruising","gen","Unexplained bruising",["bruising","bruises","easy bruising"]],
+ ["bleeding","gen","Unexplained bleeding (gums, nose)",["bleeding gums","gum bleeding","gingival bleeding","epistaxis","nosebleeds","nose bleeds"]],
+ ["petechiae","gen","Unexplained petechiae",["petechiae","petechial","purpura","purpuric","nonblanching rash","nonblanching"]],
+ ["lymph","gen","Unexplained lymphadenopathy",["lymphadenopathy","lymph node","lymph nodes","enlarged nodes","swollen glands","palpable nodes","lad"]],
+ ["lymph_gen","gen","Generalised lymphadenopathy",["generalised lymphadenopathy","generalized lymphadenopathy","widespread lymphadenopathy"]],
+ ["lymph_supra","gen","Supraclavicular or persistent cervical lymphadenopathy",["supraclavicular lymphadenopathy","supraclavicular node","supraclavicular lump","supraclavicular","virchow","persistent cervical lymphadenopathy","persistent cervical node"]],
+ ["lymph_alcohol","gen","Lymph node pain after alcohol",["node pain alcohol","lymph node pain alcohol","pain after alcohol"]],
+ ["spleen","gen","Splenomegaly",["splenomegaly","enlarged spleen","palpable spleen"]],
+ ["hsm","gen","Hepatosplenomegaly",["hepatosplenomegaly","hsm"]],
+ ["dvt","gen","Unexplained DVT",["dvt","deep vein thrombosis","vte","unprovoked dvt"]],
+ ["diabetes_new","gen","New-onset diabetes",["new diabetes","new onset diabetes","newly diagnosed diabetes","new dm","new t2dm","new type diabetes"]],
+ ["cough","chest","Cough",["cough","coughing"]],
+ ["sob","chest","Shortness of breath",["breathless","breathlessness","short breath","shortness breath","dyspnoea","dyspnea"]],
+ ["chest_pain","chest","Chest pain",["chest pain","chest discomfort","pleuritic pain"]],
+ ["haemoptysis","chest","Haemoptysis",["haemoptysis","hemoptysis","coughing blood","blood sputum","blood stained sputum"]],
+ ["hoarse","chest","Persistent hoarseness",["hoarse","hoarseness","dysphonia","voice change","croaky voice"]],
+ ["chest_inf","chest","Persistent or recurrent chest infection",["chest infection","chest infections","lrti","pneumonia"]],
+ ["clubbing","chest","Finger clubbing",["clubbing","clubbed"]],
+ ["chest_signs","chest","Chest signs of cancer or pleural disease",["chest signs","pleural effusion","effusion","consolidation"]],
+ ["smoker","chest","Ever smoked, or asbestos exposure",["smoker","smoking","smoked","smokes","pack years","asbestos"]],
+ ["neck_lump","hn","Neck lump",["neck lump","neck mass","neck swelling","lump neck","cervical node","cervical lymph"]],
+ ["thyroid","hn","Thyroid lump",["thyroid lump","thyroid nodule","thyroid mass","thyroid swelling","goitre","goiter"]],
+ ["oral_ulcer","hn","Oral ulceration over 3 weeks",["mouth ulcer","oral ulcer","oral ulceration","tongue ulcer","nonhealing ulcer mouth"]],
+ ["oral_patch","hn","Red, or red and white, oral patch",["leukoplakia","erythroplakia","white patch","red patch","oral patch"]],
+ ["oral_lump","hn","Lump on lip or in mouth",["lip lump","lump lip","mouth lump","lump mouth","oral lump","oral mass","tongue lump"]],
+ ["breast_lump","breast","Breast lump",["breast lump","breast mass","lump breast","breast nodule"]],
+ ["axilla","breast","Axillary lump",["axillary lump","axillary mass","axillary node","axillary lymphadenopathy","armpit lump","lump armpit","axilla"]],
+ ["nipple","breast","Unilateral nipple change (discharge, retraction)",["nipple discharge","nipple retraction","nipple inversion","nipple change","nipple"]],
+ ["breast_skin","breast","Skin change suggesting breast cancer",["peau dorange","skin dimpling","breast dimpling","breast skin change","dimpling","tethering"]],
+ ["pmb","gyn","Postmenopausal bleeding not explained by HRT",["postmenopausal bleeding","postmenopausal bleed","bleeding after menopause"]],
+ ["discharge","gyn","Vaginal discharge (unexplained)",["vaginal discharge"]],
+ ["urinary_freq","uro","Urinary urgency or frequency",["urinary frequency","urinary urgency","urgency","frequency micturition","urine frequency","passing urine more"]],
+ ["cervix","gyn","Cervix looks cancerous",["abnormal cervix","suspicious cervix","cervix suspicious","cervical lesion","cervix looks abnormal"]],
+ ["vaginal_mass","gyn","Vaginal mass",["vaginal mass","vaginal lump"]],
+ ["vulval","gyn","Vulval lump, ulceration or bleeding",["vulval lump","vulval ulcer","vulval bleeding","vulval lesion","vulval mass","vulval","vulva"]],
+ ["haem_vis","uro","Visible haematuria",["visible haematuria","frank haematuria","macroscopic haematuria","haematuria","hematuria","blood urine"]],
+ ["haem_post_uti","uro","Visible haematuria persisting after UTI treatment",["haematuria after uti","haematuria unresponsive uti","persistent haematuria uti","haematuria after antibiotics"]],
+ ["haem_nonvis","uro","Non-visible haematuria",["nonvisible haematuria","microscopic haematuria","dipstick haematuria","blood dipstick","nvh"]],
+ ["dysuria","uro","Dysuria",["dysuria","burning urination","stinging urine","burning urine"]],
+ ["uti_rec","uro","Recurrent or persistent UTI",["recurrent uti","recurrent utis","persistent uti","recurrent urinary tract infection","frequent utis"]],
+ ["luts","uro","Lower urinary tract symptoms (men)",["luts","lower urinary tract symptoms","nocturia","hesitancy","poor stream","weak stream","terminal dribbling","dribbling","prostatism","urinary retention","retention"]],
+ ["ed","uro","Erectile dysfunction",["erectile dysfunction","erectile"]],
+ ["testis","uro","Painless testicular enlargement or change",["testicular lump","testicular mass","testicular swelling","testicular enlargement","testicular change","scrotal lump","scrotal mass"]],
+ ["testis_pers","uro","Persistent testicular symptoms",["persistent testicular symptoms","persistent testicular pain"]],
+ ["penile","uro","Penile mass, ulcer or lesion, or foreskin or glans symptoms",["penile lesion","penile lump","penile mass","penile ulcer","penile ulceration","penile sore","penile growth","penile swelling","foreskin","glans"]],
+ ["prostate","uro","Prostate feels malignant on DRE",["malignant prostate","craggy prostate","hard prostate","irregular prostate","nodular prostate","prostate feels malignant"]],
+ ["mole","skin","Pigmented lesion, weighted 7-point score 3 or more",["sevenpointpositive"]],
+ ["nodular","skin","Lesion suggesting nodular melanoma (pigmented or not)",["nodular melanoma","amelanotic melanoma"]],
+ ["derm","skin","Dermoscopy suggests melanoma",["dermoscopy suggests melanoma","dermoscopy suspicious","suspicious dermoscopy","dermatoscopy suspicious","dermoscopy melanoma"]],
+ ["scc","skin","Lesion suggesting SCC",["scc","squamous cell","keratoacanthoma"]],
+ ["bcc","skin","Lesion suggesting BCC",["bcc","basal cell","rodent ulcer"]],
+ ["bcc_concern","skin","BCC where delay matters because of site or size",["bcc concern","large bcc","bcc site","bcc near eye","periocular bcc"]],
+ ["back_pain","msk","Persistent back pain",["back pain","backache","lower back pain","thoracic back pain"]],
+ ["bone_pain","msk","Persistent or unexplained bone pain",["bone pain","bony pain","bones ache"]],
+ ["bone_swelling","msk","Unexplained bone swelling",["bone swelling","bony swelling","bony lump"]],
+ ["fracture","msk","Unexplained fracture",["unexplained fracture","pathological fracture","fracture"]],
+ ["lump_growing","msk","Lump increasing in size",["growing lump","enlarging lump","lump increasing size","increasing lump","enlarging mass","growing mass","lump getting bigger"]],
+ ["neuro","msk","Progressive, sub-acute loss of central neurological function",["focal neurology","neurological deficit","progressive neurological","neurological function loss","new neurology","focal neurological"]],
+ ["red_reflex","msk","Absent red reflex",["absent red reflex","abnormal red reflex","red reflex","leukocoria","leukokoria","white pupil"]],
+ ["ida","res","Iron-deficiency anaemia",["iron deficiency anaemia","iron deficiency anemia","ida","iron deficiency","microcytic anaemia","low ferritin","low iron"]],
+ ["anaemia_n","res","Normocytic anaemia",["normocytic anaemia","normocytic anemia"]],
+ ["plt","res","Raised platelets",["thrombocytosis","raised platelets","platelets raised","raised plt"]],
+ ["glucose","res","Raised blood glucose",["raised glucose","raised blood glucose","raised blood sugar","hyperglycaemia","hyperglycemia"]],
+ ["wbc_high","res","Raised white cell count",["raised white cell","raised wcc","raised wbc","leucocytosis","leukocytosis"]],
+ ["ca_high","res","Raised calcium",["hypercalcaemia","hypercalcemia","raised calcium","raised ca"]],
+ ["wbc_low","res","Low white cell count",["leucopenia","leukopenia","low white cell","low wcc","low wbc"]],
+ ["esr","res","Raised ESR or plasma viscosity",["raised esr","esr raised","raised pv","raised plasma viscosity"]],
+ ["ca125","res","CA-125 at or above threshold",["raised ca125","ca125 raised","ca125 positive","ca125 abnormal"]],
+ ["fit_pos","res","FIT 10 µg Hb/g or more",["fit positive","positive fit","raised fit","fit raised","fit abnormal"]],
+ ["psa","res","PSA above age-specific range",["raised psa","psa raised","psa abnormal"]],
+ ["cxr_ca","res","Chest imaging shows a mass, or suggests lung cancer or mesothelioma",["chest mass","chest lesion","hilar mass","lung opacity","chest xray suspicious","suspicious chest xray","chest xray mass","chest xray suggests cancer","chest xray lesion","lung mass","lung lesion","lung tumour","suspicious lung","ct suggests lung cancer","mesothelioma","pleural mass"]],
+ ["sarcoma_img","res","X-ray or ultrasound suggests sarcoma",["suspected sarcoma","imaging suggests sarcoma","xray suggests sarcoma","ultrasound suggests sarcoma","sarcoma"]],
+ ["uss_ovary","res","Ultrasound suggests ovarian cancer",["ultrasound suggests ovarian","suspicious ovarian ultrasound","complex ovarian cyst","ovarian ultrasound abnormal"]],
+ ["myeloma_test","res","Electrophoresis, light chains or Bence Jones suggest myeloma",["bence jones","paraprotein","monoclonal band","electrophoresis abnormal","abnormal electrophoresis","serum free light chains","free light chains","abnormal light chains","raised light chains","light chain ratio","sflc","kappa lambda ratio"]],
+ ["bone_img","res","Imaging shows a bone lesion (lytic, sclerotic or mass)",["bone mass","bone lesion","bone tumour","bone mets","bone destruction","bone lucency","lucent lesion","lytic","lytic lesion","osteolytic","sclerotic lesion","sclerotic bone","osteosclerotic","periosteal reaction","bone deposits"]],
+ ["img_liver","res","Liver lesion on imaging",["liver lesion","liver mets","liver mass ct","liver mass ultrasound","liver mass scan","liver nodule","liver sol","liver deposits","liver tumour"]],
+ ["mets","res","Imaging or report suggests metastases",["mets","secondary deposits","widespread mets","unknown primary","cup","muo"]],
+ ["img_ca","res","Imaging or report suggests cancer (other site)",["ct mass","ct lesion","ct suspicious","ct suggests cancer","mri mass","mri lesion","mri suspicious","pet avid","scan mass","scan lesion","scan suspicious","imaging mass","imaging lesion","imaging suspicious","suspicious imaging","ultrasound mass","ultrasound lesion","suspected malignancy","suspicious malignancy","likely malignancy","concerning malignancy","likely malignant","malignant appearance","neoplasm","neoplastic","tumour","space occupying lesion","sol","renal mass","renal lesion","kidney mass","kidney lesion","adrenal mass","pancreatic mass","pancreas mass","pancreatic lesion"]],
+ ["mediast","res","Mediastinal mass or widening",["mediastinal mass","mediastinal widening","widened mediastinum","mediastinal lymphadenopathy","mediastinal lesion"]],
+ ["squint_new","cyp","New squint (paralytic, or not correcting)",["new squint","new onset squint","paralytic squint","acute squint","sudden squint","new strabismus","sixth nerve palsy","6th nerve palsy","nerve palsy"]],
+ ["eye_signs","cyp","Proptosis, abnormal eye movements, blurred or double vision, or papilloedema",["proptosis","exophthalmos","abnormal eye movements","nystagmus","double vision","diplopia","blurred vision","papilloedema","papilledema","loss of vision","visual loss","vision loss"]],
+ ["headache","cyp","Headache",["headache","headaches","head ache"]],
+ ["headache_kid","cyp","Headache waking from sleep or worse in the morning",["morning headache","early morning headache","headache waking","headache wakes","wakes headache","nocturnal headache","headache at night","persistent headache under 4"]],
+ ["vomit_wake","cyp","Persistent vomiting on waking",["vomiting on waking","vomiting waking","morning vomiting","early morning vomiting","vomits morning"]],
+ ["head_circ","cyp","Head circumference crossing centiles",["head circumference","increasing head circumference","head circumference centiles","ofc crossing centiles","crossing centiles head","macrocephaly"]],
+ ["neuro_kid","cyp","Abnormal gait, coordination or head position, or developmental regression",["abnormal gait","unsteady gait","unsteady walking","ataxia","ataxic","poor coordination","abnormal coordination","incoordination","head tilt","wry neck","torticollis","developmental regression","regression","loss of skills","losing skills","lost milestones","new bladder dysfunction","new bowel dysfunction","new incontinence","confusion headache","focal weakness","leg weakness"]],
+ ["seizure","cyp","Afebrile seizure",["afebrile seizure","afebrile convulsion","seizure","seizures","convulsion","convulsions"]],
+ ["limp","cyp","Unexplained limp or not weight bearing",["limp","limping","not weight bearing","non weight bearing","refusing to walk","refusing to weight bear","off legs"]],
+ ["scoliosis_pain","cyp","Painful scoliosis",["painful scoliosis","scoliosis pain","scoliosis painful"]],
+ ["wheeze_atyp","cyp","Atypical new wheeze or stridor, orthopnoea or facial swelling",["atypical wheeze","atypical stridor","wheeze orthopnoea","stridor orthopnoea","wheeze lying flat","breathless lying flat","orthopnoea","orthopnea","wheeze facial swelling"]],
+ ["repeat_pres","cyp","Repeated presentations with the same problem",["repeat presentation","repeated presentation","repeated presentations","repeated attendance","multiple attendances","multiple presentations","seen several times","third presentation","reattendance","reattended","keeps coming back"]],
+ ["parental","cyp","Persistent parental concern",["parental concern","parent concerned","parents concerned","parent worried","parents worried"]]
+];
+// Findings that logically include another finding
+const IMPLIES = {neuro_kid:["neuro"],vomit_wake:["nv"],headache_kid:["headache"],mediast:["cxr_ca"],lymph_gen:["lymph"],lymph_supra:["lymph"],hsm:["spleen"],haem_post_uti:["haem_vis"],dyspepsia_res:["dyspepsia"]};
+// Skin descriptors. These open the skin lesion check and suggest findings; they never select one outright,
+// because NG12 asks whether a lesion "raises the suspicion" of each cancer, which is a clinical call.
+// ctx: counts only when a skin lesion is mentioned somewhere in the text. exact: whole word (or plural) only.
+const SKIN_IDS=new Set(["mole","nodular","derm","scc","bcc","bcc_concern"]);
+// Words that only describe where or what a skin lesion is; they shouldn't trigger unrelated suggestions
+const SKIN_EXPLAIN=new Set("patch back arm shoulder trunk chest thigh foot finger toe nail neck edge border surface single small large dark red pink brown black blue grey white skin lesion".split(" "));
+const LESION_CTX=["lesion","spot","growth","nodule","papule","plaque","bump","scab","mole","freckle","naevus","wart","skin","lump","ulcer"];
+const CUES=[
+ {t:["nonhealing","unhealed","scab","crust","crusted","crusty","crusting"],ids:["scc","bcc"]},
+ {t:["keratotic","hyperkeratotic","keratosis","horn","scaly","scaling","warty","verrucous"],ids:["scc"]},
+ {t:["ulcer","ulcerated","ulcerating","ulceration"],ids:["scc","bcc"]},
+ {t:["pearly","rolled","telangiectasia","telangiectatic","telangiectases","translucent"],ids:["bcc","bcc_concern"]},
+ {t:["amelanotic","nonpigmented","pink nodule","red nodule","pyogenic granuloma"],ids:["nodular","scc","bcc"]},
+ {t:["mole","pigmented","pigment","naevus","freckle","lentigo","melanoma","melanocytic","dark spot","black spot","brown spot","birthmark","sevenpointnegative","point checklist","point score","abcde","asymmetric","asymmetrical","asymmetry","irregular border","irregular edge","irregular shape","irregular colour","irregular color","variegated","multicoloured","multicolored","darkening","subungual","melanonychia","nail streak","nail band"],ids:["mole","nodular","derm"],pig:true},
+ {t:["irregular"],ids:["mole","nodular","derm"],ctx:true,pig:true},
+ {t:["growing","enlarging","bigger","grown"],ids:["scc","nodular"],ctx:true},
+ {t:["bleeds","bleeding","bleed","oozing","ooze","weeping"],ids:["scc","bcc","nodular"],ctx:true},
+ {t:["nodule","papule","raised","firm","domed"],ids:["scc","bcc","nodular"],ctx:true},
+ {t:["face","nose","ear","lip","eyelid","eye","forehead","temple","cheek","canthus"],ids:["bcc","bcc_concern","scc"],ctx:true,exact:true},
+ {t:["scalp","hand","sun exposed","shin","leg"],ids:["scc","bcc"],ctx:true,exact:true},
+ {t:["skin lesion","skin lump","skin growth","skin spot","skin nodule","skin cancer"],ids:["scc","bcc","mole"]},
+ {t:["immunosuppressed","immunosuppression","immunocompromised","transplant","prevskincancer","azathioprine","ciclosporin","cyclosporin","tacrolimus","actinic","solar keratosis","bowens","sun damage","sun damaged"],ids:[],risk:true}
+];
+// Weighted 7-point checklist for pigmented lesions
+const CHK=[["size",2,"Change in size"],["shape",2,"Irregular shape or border"],["colour",2,"Irregular colour"],["diam",1,"Largest diameter 7 mm or more"],["infl",1,"Inflammation"],["ooze",1,"Oozing or crusting"],["sens",1,"Change in sensation, including itch"]];
+const CHK_RX={size:/\b(?:growing|enlarg\w*|bigger|grown|increas\w* in size|change in size|changing size|getting larger)\b/,
+ shape:/\birregular(?:ly)?\b(?!\s*(?:colou?r|pigment))|\basymmetr\w*|\bragged|\bnotched/,
+ colour:/\birregular colou?r|\bvariegat\w*|\bmulti ?colou?r\w*|\buneven colou?r|\bchang\w* colou?r|\bdarken\w*|\bseveral colou?rs/,
+ infl:/\binflam\w*/,ooze:/\booz\w*|\bweep\w*|\bcrust\w*|\bbleed\w*/,sens:/\bitch\w*|\btingl\w*|\bchange in sensation|\baltered sensation/};
+// Shared action wording. Text starting "Consider" is shown as a 'consider' recommendation.
+// src marks actions that are not NG12 text; dk links a 'consider' action to a firm version of the same step.
+const OGD="Consider non-urgent direct-access OGD (oesophageal or stomach)";
+const PANC="Consider urgent direct-access CT abdomen (pancreatic), or ultrasound if CT unavailable";
+const CXR_O="Urgent direct-access chest X-ray (lung or mesothelioma)";
+const CXR_C="Consider urgent direct-access chest X-ray (lung or mesothelioma)";
+const MYEL="Myeloma blood tests: FBC, calcium, ESR or PV, serum protein electrophoresis, serum free light chains";
+const NSS="Assess for other features, then offer urgent investigation, a suspected cancer pathway referral or a non-specific symptoms pathway referral";
+const CA125="Measure CA-125 (ovarian)";
+const PSA="Consider PSA and DRE (prostate)";
+const US_ENDO="Consider urgent direct-access pelvic ultrasound (endometrial)";
+const LYM="Consider urgent suspected cancer referral: haematology (lymphoma)";
+const LARYNX="Consider urgent suspected cancer referral: head and neck (laryngeal)";
+const DENT="Consider urgent referral to a dentist (oral)";
+const P_LYM="Consider very urgent paediatric referral (lymphoma)";
+const P_SARC="Consider very urgent paediatric referral (sarcoma)";
+const P_IMM="Immediate referral by telephone to the acute paediatric team";
+const P_AMB="Consider referral to, or discussion with, a paediatrician";
+const RULES = [
+ // Upper GI
+ {p:"a",f:["dysphagia"],u:"2w",act:"Urgent suspected cancer referral: upper GI (oesophageal or stomach)"},
+ {p:"a",f:["weight_loss"],any:[["upper_abdo_pain","reflux","dyspepsia"]],min:55,u:"2w",act:"Urgent suspected cancer referral: upper GI (oesophageal or stomach)"},
+ {p:"a",f:["mass_stomach"],u:"2w",act:"Consider urgent suspected cancer referral: upper GI (stomach)"},
+ {p:"a",f:["jaundice"],min:40,u:"2w",act:"Urgent suspected cancer referral: upper GI (pancreatic)"},
+ {p:"a",f:["mass_liver"],u:"2w",act:"Consider urgent direct-access ultrasound (liver or gallbladder)"},
+ {p:"a",f:["haematemesis"],u:"oth",act:OGD,note:"Acute haematemesis needs assessment of urgency first; NG12’s non-urgent OGD is for the stable presentation."},
+ {p:"a",f:["dyspepsia_res"],min:55,u:"oth",act:OGD},
+ {p:"a",f:["upper_abdo_pain"],any:[["ida","anaemia_n"]],min:55,u:"oth",act:OGD},
+ {p:"a",f:["plt"],any:[["nv","weight_loss","reflux","dyspepsia","upper_abdo_pain"]],min:55,u:"oth",act:OGD},
+ {p:"a",f:["nv"],any:[["weight_loss","reflux","dyspepsia","upper_abdo_pain"]],min:55,u:"oth",act:OGD},
+ // Pancreatic
+ {p:"a",f:["weight_loss"],any:[["bowel","back_pain","abdo_pain","nv","diabetes_new"]],min:60,u:"2w",act:PANC},
+ // Lower GI
+ {p:"a",f:["fit_pos"],u:"2w",act:"Urgent suspected cancer referral: lower GI (colorectal)"},
+ {p:"a",f:["rectal_mass"],u:"2w",act:"Consider urgent suspected cancer referral: lower GI (colorectal)",note:"No FIT needed first for a rectal mass (NG12 1.3.1)."},
+ {p:"a",f:["anal"],u:"2w",act:"Consider urgent suspected cancer referral: lower GI (anal)",note:"No FIT needed first for an unexplained anal mass or ulcer (NG12 1.3.1)."},
+ {p:"a",f:["abdo_mass"],u:"oth",act:"Offer FIT",note:"If FIT is under 10 or not returned, don’t delay referral where concern is strong, for example an abdominal mass (NG12 1.3.3)."},
+ {p:"a",f:["bowel"],u:"oth",act:"Offer FIT"},
+ {p:"a",f:["ida"],u:"oth",act:"Offer FIT"},
+ {p:"a",f:["anaemia_n"],min:60,u:"oth",act:"Offer FIT"},
+ {p:"a",f:["abdo_pain","weight_loss"],min:40,u:"oth",act:"Offer FIT"},
+ {p:"a",f:["abdo_pain"],min:50,u:"oth",act:"Offer FIT"},
+ {p:"a",f:["weight_loss"],min:50,u:"oth",act:"Offer FIT"},
+ {p:"a",f:["rectal_bleed"],any:[["abdo_pain","weight_loss"]],max:50,u:"oth",act:"Offer FIT"},
+ {p:"a",f:["rectal_bleed"],min:50,u:"oth",act:"Offer FIT"},
+ // Ovarian
+ {p:"a",f:["ascites"],sex:"F",u:"2w",act:"Urgent suspected cancer referral: gynaecology (ovarian)"},
+ {p:"a",f:["pelvic_mass"],sex:"F",u:"2w",act:"Urgent suspected cancer referral: gynaecology (ovarian)"},
+ {p:"a",f:["uss_ovary"],u:"2w",act:"Urgent suspected cancer referral: gynaecology (ovarian)"},
+ {p:"a",any:[["distension","satiety","appetite","abdo_pain","urinary_freq","bowel","fatigue","weight_loss"]],sex:"F",min:40,u:"oth",act:CA125,note:"Symptoms should be persistent or frequent (over 12 times a month). Weight loss, fatigue and bowel change are ‘consider’ triggers in NG12."},
+ {p:"a",any:[["distension","satiety","appetite","abdo_pain","urinary_freq","bowel","fatigue","weight_loss"]],sex:"F",max:40,u:"2w",act:"Consider urgent direct-access ultrasound of abdomen and pelvis (ovarian)",note:"Under 40, don’t use CA-125 on its own for decisions (NG12 2026)."},
+ {p:"a",f:["ibs_new"],sex:"F",min:50,u:"oth",act:CA125},
+ {p:"a",f:["urinary_freq"],sex:"F",min:40,u:"oth",act:CA125},
+ {p:"a",f:["ca125"],u:"2w",act:"Urgent direct-access ultrasound of abdomen and pelvis (ovarian)",note:"CA-125 thresholds (IU/ml): 40–49 ≥35, 50–59 ≥31, 60–69 ≥24, 70–79 ≥25, 80+ ≥31."},
+ // Endometrial, cervical, vaginal, vulval
+ {p:"a",f:["pmb"],min:55,u:"2w",act:"Urgent suspected cancer referral: gynaecology (endometrial)",note:"Unscheduled bleeding on HRT: NG12 points to British Menopause Society guidance."},
+ {p:"a",f:["pmb"],max:55,u:"2w",act:"Consider urgent suspected cancer referral: gynaecology (endometrial)",note:"Unscheduled bleeding on HRT: NG12 points to British Menopause Society guidance."},
+ {p:"a",f:["discharge"],min:55,u:"2w",act:US_ENDO,note:"NG12: discharge at first presentation, or with thrombocytosis or haematuria."},
+ {p:"a",f:["haem_vis"],any:[["ida","anaemia_n","plt","glucose","discharge"]],sex:"F",min:55,u:"2w",act:US_ENDO},
+ {p:"a",f:["cervix"],u:"2w",act:"Consider urgent suspected cancer referral: gynaecology (cervical)"},
+ {p:"a",f:["vaginal_mass"],u:"2w",act:"Consider urgent suspected cancer referral: gynaecology (vaginal)"},
+ {p:"a",f:["vulval"],u:"2w",act:"Consider urgent suspected cancer referral: gynaecology (vulval)"},
+ // Breast
+ {p:"a",f:["breast_lump"],min:30,u:"2w",act:"Urgent suspected cancer referral: breast"},
+ {p:"a",f:["nipple"],min:50,u:"2w",act:"Urgent suspected cancer referral: breast"},
+ {p:"a",f:["axilla"],min:30,u:"2w",act:"Consider urgent suspected cancer referral: breast"},
+ {p:"a",f:["breast_skin"],u:"2w",act:"Consider urgent suspected cancer referral: breast"},
+ {p:"a",f:["breast_lump"],max:30,u:"oth",act:"Consider non-urgent breast referral"},
+ // Lung and pleura
+ {p:"a",f:["haemoptysis"],min:40,u:"2w",act:"Urgent suspected cancer referral: lung"},
+ {p:"a",f:["cxr_ca"],u:"2w",act:"Urgent suspected cancer referral: lung or mesothelioma",note:"NG12 1.1.1 and 1.1.4 are worded for chest X-ray findings."},
+ {p:"a",special:"cxr",min:40,u:"2w",act:CXR_O,dk:"cxr"},
+ {p:"a",f:["chest_inf"],min:40,u:"2w",act:CXR_C,dk:"cxr"},
+ {p:"a",f:["clubbing"],min:40,u:"2w",act:CXR_C,dk:"cxr"},
+ {p:"a",f:["chest_signs"],min:40,u:"2w",act:CXR_C,dk:"cxr"},
+ {p:"a",f:["lymph_supra"],min:40,u:"2w",act:CXR_C,dk:"cxr"},
+ {p:"a",f:["plt"],min:40,u:"2w",act:CXR_C,dk:"cxr"},
+ // Head and neck
+ {p:"a",f:["hoarse"],min:45,u:"2w",act:LARYNX},
+ {p:"a",f:["neck_lump"],min:45,u:"2w",act:LARYNX},
+ {p:"a",f:["neck_lump"],u:"2w",act:"Consider urgent suspected cancer referral: head and neck (oral), if persistent",note:"Applies to a persistent, unexplained neck lump."},
+ {p:"a",f:["oral_ulcer"],u:"2w",act:"Consider urgent suspected cancer referral: head and neck (oral)"},
+ {p:"a",f:["thyroid"],u:"2w",act:"Consider urgent suspected cancer referral: head and neck (thyroid)"},
+ {p:"a",f:["oral_patch"],u:"2w",act:DENT,note:"The dentist can then refer on the suspected cancer pathway (NG12 1.8.4)."},
+ {p:"a",f:["oral_lump"],u:"2w",act:DENT,note:"The dentist can then refer on the suspected cancer pathway (NG12 1.8.4)."},
+ // Haematology, adults
+ {p:"a",any:[["pallor","fatigue","fever","infection","lymph_gen","bruising","bleeding","petechiae","hsm"]],u:"48h",act:"Consider very urgent FBC (leukaemia)"},
+ {p:"a",f:["lymph"],u:"2w",act:LYM},
+ {p:"a",f:["spleen"],u:"2w",act:LYM},
+ {p:"a",any:[["fever","sweats","pruritus","weight_loss","sob"],["lymph","spleen","lymph_gen"]],u:"2w",act:LYM},
+ {p:"a",f:["lymph_alcohol"],u:"2w",act:"Consider urgent suspected cancer referral: haematology (Hodgkin lymphoma)"},
+ {p:"a",any:[["back_pain","bone_pain","fracture"]],min:60,u:"oth",act:MYEL,dk:"myel",note:"Use a Bence Jones urine test if serum free light chains aren’t available."},
+ {p:"a",any:[["ca_high","wbc_low","esr"],["back_pain","bone_pain","fracture"]],min:60,u:"2w",act:"Urgent suspected cancer referral: haematology (myeloma)",note:"NG12 1.10.5: when the myeloma blood tests suggest myeloma, with persistent bone pain (particularly back pain) or unexplained fracture."},
+ {p:"a",f:["myeloma_test"],u:"2w",act:"Urgent suspected cancer referral: haematology (myeloma)"},
+ // Urology
+ {p:"a",f:["haem_vis"],min:45,u:"2w",act:"Urgent suspected cancer referral: urology (bladder or kidney), if no UTI"},
+ {p:"a",f:["haem_post_uti"],min:45,u:"2w",act:"Urgent suspected cancer referral: urology (bladder or kidney)"},
+ {p:"a",f:["haem_nonvis"],any:[["dysuria","wbc_high"]],min:60,u:"2w",act:"Urgent suspected cancer referral: urology (bladder)"},
+ {p:"a",f:["uti_rec"],min:60,u:"oth",act:"Consider non-urgent urology referral (bladder)"},
+ {p:"a",f:["prostate"],u:"2w",act:"Urgent suspected cancer referral: urology (prostate)"},
+ {p:"a",f:["psa"],u:"2w",act:"Consider urgent suspected cancer referral: urology (prostate)",note:"PSA thresholds (µg/L): 40–49 >2.5, 50–59 >3.5, 60–69 >4.5, 70–79 >6.5; judgement under 40 and over 79. Take account of preferences and comorbidities."},
+ {p:"a",f:["haem_vis"],sex:"M",u:"oth",act:PSA},
+ {p:"a",f:["luts"],sex:"M",u:"oth",act:PSA},
+ {p:"a",f:["urinary_freq"],sex:"M",u:"oth",act:PSA},
+ {p:"a",f:["ed"],u:"oth",act:PSA},
+ {p:"a",f:["testis"],u:"2w",act:"Consider urgent suspected cancer referral: urology (testicular)"},
+ {p:"a",f:["testis_pers"],u:"2w",act:"Consider urgent direct-access testicular ultrasound"},
+ {p:"a",f:["penile"],u:"2w",act:"Consider urgent suspected cancer referral: urology (penile)",note:"NG12: a mass or ulcer with STI excluded, a lesion persisting after STI treatment, or unexplained or persistent foreskin or glans symptoms."},
+ // Skin
+ {p:"b",f:["mole"],u:"2w",act:"Urgent suspected cancer referral: skin (melanoma)"},
+ {p:"b",f:["derm"],u:"2w",act:"Urgent suspected cancer referral: skin (melanoma)"},
+ {p:"b",f:["nodular"],u:"2w",act:"Consider urgent suspected cancer referral: skin (melanoma)"},
+ {p:"a",f:["scc"],u:"2w",act:"Consider urgent suspected cancer referral: skin (SCC)"},
+ {p:"a",f:["bcc"],u:"oth",act:"Consider routine referral (BCC)"},
+ {p:"a",f:["bcc_concern"],u:"2w",act:"Consider urgent suspected cancer referral: skin (BCC)",note:"NG12: only if there is particular concern that delay could matter because of site or size."},
+ // Sarcoma, brain
+ {p:"a",f:["lump_growing"],u:"2w",act:"Consider urgent direct-access ultrasound (soft tissue sarcoma)"},
+ {p:"a",f:["sarcoma_img"],u:"2w",act:"Consider urgent suspected cancer referral: sarcoma"},
+ {p:"a",f:["neuro"],u:"2w",act:"Consider urgent direct-access MRI brain, or CT if MRI contraindicated"},
+ // Imaging findings outside NG12's own list
+ {p:"a",f:["bone_img"],u:"2w",act:"Consider urgent suspected cancer referral: sarcoma (bone)",note:"NG12 1.11.1 is worded for an X-ray suggesting bone sarcoma. In adults, metastases and myeloma are commoner causes of a bone lesion, so go by the report’s differential."},
+ {p:"a",f:["bone_img"],u:"2w",src:"CG104",dk:"muo",act:"Consider CUP team referral if the report suggests metastases"},
+ {p:"a",f:["bone_img"],u:"oth",src:"CG104",dk:"myel",act:"Consider myeloma blood tests if lytic: FBC, calcium, ESR or PV, serum protein electrophoresis, serum free light chains",note:"CG104 includes a myeloma screen for isolated or multiple lytic bone lesions."},
+ {p:"a",f:["mets"],u:"2w",src:"CG104",dk:"muo",act:"Refer to the cancer of unknown primary (CUP) team on the suspected cancer pathway, or to the site team if the primary is obvious",note:"CG104: metastases on examination or imaging with no obvious primary. Suspected spinal cord compression or an acutely unwell patient needs same-day assessment instead."},
+ {p:"a",f:["img_liver"],u:"2w",src:"Not NG12",act:"Consider suspected cancer pathway referral: upper GI or hepatobiliary (liver lesion)",note:"NG12 covers a liver felt on examination, not imaging. Many incidental liver lesions are benign; act on the report and the local pathway."},
+ {p:"a",f:["img_ca"],u:"2w",src:"Not NG12",act:"Consider suspected cancer pathway referral to the site the imaging points to",note:"NG12 only lists chest X-ray, ultrasound and bone X-ray findings. If the route is unclear, discuss with the radiologist or specialist (NG12 1.16.2)."},
+ // Non-site-specific
+ {p:"a",f:["weight_loss"],min:60,u:"2w",act:NSS,note:"NG12 1.13.2 (2026): weight loss over 5% in 6 months. Possible cancers include colorectal, gastro-oesophageal, lung, prostate, pancreatic and urological."},
+ {p:"a",f:["appetite"],u:"2w",act:NSS,note:"NG12 1.13.3: possible cancers include lung, oesophageal, stomach, colorectal, pancreatic, bladder and renal."},
+ {p:"a",f:["dvt"],u:"2w",act:"Consider urgent investigation, a suspected cancer pathway referral or a non-specific symptoms pathway referral, after assessing for other features",note:"NG12 1.13.4: linked to urogenital, breast, colorectal and lung cancer."},
+ // Children and young people
+ {p:"c",f:["petechiae"],u:"imm",act:"Immediate paediatric referral (leukaemia)"},
+ {p:"c",f:["hsm"],u:"imm",act:"Immediate paediatric referral (leukaemia)"},
+ {p:"c",any:[["bruising","bleeding","fatigue","fever","infection","pallor","bone_pain","lymph_gen"]],u:"48h",act:"Very urgent FBC (leukaemia)",note:"CCLG: an unwell child with features of leukaemia or lymphoma needs same-day referral by telephone."},
+ {p:"c",f:["lymph"],u:"48h",act:P_LYM,note:"CCLG: reassuring if under 2 cm, shrinking or fluctuating, tender, or with a clear infective cause. Concerning if over 2 cm for 6 weeks, firm, non-mobile, painless or supraclavicular."},
+ {p:"c",f:["spleen"],u:"48h",act:P_LYM},
+ {p:"c",any:[["fever","sweats","pruritus","weight_loss","sob"],["lymph","spleen","lymph_gen"]],u:"48h",act:P_LYM},
+ {p:"c",any:[["abdo_mass","mass_liver"]],u:"48h",act:"Consider very urgent paediatric referral (neuroblastoma or Wilms’)",note:"CCLG: often needs immediate referral if there is pain, hypertension, reduced urine output or rapid growth."},
+ {p:"c",f:["haem_vis"],u:"48h",act:"Consider very urgent paediatric referral (Wilms’)"},
+ {p:"c",f:["neuro"],u:"48h",act:"Consider very urgent paediatric referral (brain or CNS tumour)"},
+ {p:"c",any:[["sarcoma_img","bone_img"]],u:"48h",act:P_SARC},
+ {p:"c",f:["lump_growing"],u:"48h",act:"Consider very urgent direct-access ultrasound (soft tissue sarcoma)"},
+ {p:"c",any:[["bone_swelling","bone_pain"]],u:"48h",act:"Consider very urgent direct-access X-ray (bone sarcoma)"},
+ {p:"c",any:[["mets","img_ca","img_liver"]],u:"48h",src:"Not NG12",act:"Consider very urgent paediatric referral, discussing with paediatric oncology"},
+ {p:"c",f:["red_reflex"],u:"2w",act:"Consider urgent suspected cancer referral: ophthalmology (retinoblastoma)",note:"CCLG: very urgent (48 hours) in infants. With a new squint, see NICE NG127."},
+ {p:"c",f:["parental"],u:"oth",act:"Consider paediatric referral"},
+ // Children and young people: CCLG referral guidance (NICE-endorsed supplement to NG12, 2021)
+ {p:"c",f:["squint_new"],u:"imm",src:"CCLG",act:P_IMM,note:"CCLG: a new squint that doesn’t correct with refraction, or any paralytic squint, strongly suggests a brain tumour."},
+ {p:"c",f:["neuro_kid"],u:"imm",src:"CCLG",act:P_IMM,note:"CCLG: abnormal gait, coordination or head position, focal signs, new bladder or bowel dysfunction, regression, or confusion with headache."},
+ {p:"c",f:["scoliosis_pain"],u:"imm",src:"CCLG",act:P_IMM,note:"CCLG: idiopathic scoliosis is rarely painful; think spinal tumour or cord compression."},
+ {p:"c",f:["limp","fever"],u:"imm",src:"CCLG",act:P_IMM},
+ {p:"c",any:[["lymph","lymph_gen","lymph_supra"],["bone_pain","limp"]],u:"imm",src:"CCLG",act:P_IMM},
+ {p:"c",any:[["mediast","cxr_ca"]],u:"imm",src:"CCLG",act:P_IMM,note:"CCLG: a mediastinal mass can present as atypical wheeze or stridor; steroids before diagnosis can mask lymphoma or leukaemia."},
+ {p:"c",f:["wheeze_atyp"],u:"imm",src:"CCLG",act:"Same-day chest X-ray, reviewed before starting oral steroids (mediastinal mass)",note:"CCLG: orthopnoea, facial swelling or mediastinal widening need immediate referral."},
+ {p:"c",f:["mass_liver"],u:"imm",src:"CCLG",act:P_IMM,note:"CCLG: unexplained hepatomegaly."},
+ {p:"c",f:["bone_img"],u:"imm",src:"CCLG",act:P_IMM,note:"CCLG: X-ray findings suggestive of cancer go straight to the acute paediatric consultant or paediatric oncologist."},
+ {p:"c",f:["eye_signs"],u:"48h",src:"CCLG",act:"Very urgent referral to ophthalmology or paediatrics"},
+ {p:"c",any:[["headache_kid","head_circ"]],u:"48h",src:"CCLG",act:"Very urgent paediatric referral (possible brain tumour)",note:"CCLG also includes persistent headache in a child under 4. HeadSmart lists symptoms by age."},
+ {p:"c",any:[["bone_pain","bone_swelling"]],u:"48h",src:"CCLG",act:"Very urgent paediatric referral (bone tumour), with an X-ray in parallel",note:"CCLG: persistent localised bone pain or swelling. Don’t let the X-ray delay referral; a remembered minor injury is often falsely reassuring."},
+ {p:"c",f:["testis"],u:"48h",src:"CCLG",act:"Very urgent paediatric referral (testicular mass)"},
+ {p:"c",f:["limp"],u:"48h",src:"CCLG",act:"Very urgent FBC (leukaemia)"},
+ {p:"c",f:["lump_growing"],u:"2w",src:"CCLG",act:"Urgent paediatric referral (soft tissue sarcoma); don’t let the ultrasound delay it"},
+ {p:"c",f:["seizure"],u:"2w",src:"CCLG",act:"Urgent paediatric referral (afebrile seizure)"},
+ {p:"c",f:["haem_nonvis"],u:"2w",src:"CCLG",act:"Urgent paediatric referral (persistent unexplained microscopic haematuria)"},
+ {p:"c",f:["vomit_wake"],u:"oth",src:"CCLG",act:"Paediatric referral; urgency depends on the length of history and other features"},
+ {p:"c",f:["headache","nv"],u:"oth",src:"CCLG",act:P_AMB},
+ {p:"c",f:["back_pain"],u:"oth",src:"CCLG",act:P_AMB,note:"CCLG: back pain in a child needs a high index of suspicion. With weakness, sensory change or bladder or bowel dysfunction, treat as cord compression and refer immediately."},
+ {p:"c",any:[["repeat_pres","weight_loss"]],u:"oth",src:"CCLG",act:P_AMB,note:"CCLG: ask how many times they’ve sought advice, including NHS 111."}
+];
+const CXR_SET = ["cough","fatigue","sob","chest_pain","weight_loss","appetite"];
+const TIERS=[["imm","Immediately","Now","Immediate referral"],["48h","Within 48 hours","48 h","Very urgent: within 48 hours"],["2w","Within 2 weeks","2 wk","Urgent: within 2 weeks"],["oth","Other actions","Other","Investigation or non-urgent action"]];
+const RES=[
+ ["cclg","CCLG: referral guidance for suspected cancer in children and young people","NICE-endorsed supplement to NG12 (2021): red, amber and green features, and referral routes for children","https://www.cclg.org.uk/sites/default/files/2025-02/cclg-referral-guidance-april-2021.pdf"],
+ ["gc","GatewayC early diagnosis courses","NICE-endorsed case-based e-learning: oesophageal, ovarian and lung cancer, among others","https://www.gatewayc.org.uk/courses/"],
+ ["bcuk","Bowel Cancer UK: referring people under 50","NICE-endorsed (2020). Predates the 2023 FIT recommendations, so its referral criteria are superseded; still useful on family history and symptom diaries","https://bowelcancerorguk.s3.amazonaws.com/Publications/A%20guide%20for%20GPs_ReviewedNovember2020.pdf"],
+ ["macm","Macmillan rapid referral guidelines","NICE-endorsed summary of NG12 (2022 edition), so check against the 2023 to 2026 updates","https://macmillan.org.uk/healthcare-professionals/cancer-pathways/prevention-and-diagnosis/rapid-referral-guidelines"],
+ ["cg104","NICE CG104: metastatic malignancy of unknown primary","Source of the CUP team and lytic-lesion actions","https://www.nice.org.uk/guidance/cg104/chapter/Recommendations"],
+ ["ng12","NICE NG12: suspected cancer recognition and referral","Updated April 2026","https://www.nice.org.uk/guidance/ng12"]];
+</script>
+<script>
+  const GROUP = Object.fromEntries(GROUPS);
+  const F = Object.fromEntries(FINDINGS.map(([id, g, l, s]) => [id, { id, g, l, s }]));
+  const TIER = Object.fromEntries(TIERS.map(([k, , short]) => [k, short]));
+  const TIER_ORDER = { imm: 0, "48h": 1, "2w": 2, oth: 3 };
+  const label = id => (F[id] ? F[id].l : id).replace(/\s*\([^)]*\)/g, "").trim();
+  const ageText = r => {
+    const a = [];
+    if (r.min != null) a.push(r.min + " or over");
+    if (r.max != null) a.push("under " + r.max);
+    return a.length ? "age " + a.join(" and ") : "";
+  };
+  const POP = { a: "adults", c: "children and young people", b: "" };
+
+  // Parents a finding counts as (e.g. supraclavicular nodes are also lymphadenopathy)
+  const PARENTS = id => IMPLIES[id] || [];
+
+  // ---------- Matching ----------
+  const STOP = new Set("a an and or of the in on at to for with without from is are was were patient pt".split(" "));
+  const norm = t => (t || "").toLowerCase().replace(/[’']/g, "").replace(/[^a-z0-9]+/g, " ").trim();
+  const tokens = t => norm(t).split(" ").filter(w => w && !STOP.has(w));
+  function lev(a, b) {
+    if (Math.abs(a.length - b.length) > 2) return 9;
+    let p = Array.from({ length: b.length + 1 }, (_, j) => j);
+    for (let i = 1; i <= a.length; i++) {
+      const c = [i];
+      for (let j = 1; j <= b.length; j++) c[j] = Math.min(p[j] + 1, c[j - 1] + 1, p[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+      p = c;
+    }
+    return p[b.length];
+  }
+  function tokMatch(q, w) {
+    if (q === w) return 3;
+    if (q.length >= 3 && w.startsWith(q)) return 2;
+    if (w.length >= 4 && q.startsWith(w) && q.length - w.length <= 3) return 2;
+    if (q.length >= 6 && w.length >= 5 && q.slice(0, 2) === w.slice(0, 2) && lev(q, w) <= 1) return 1;
+    return 0;
+  }
+  // Searchable words for each finding: its label and synonyms, its area, and the actions it leads to
+  const RULES_FOR = {};
+  RULES.forEach(r => {
+    const ids = r.special === "cxr" ? CXR_SET.concat(["smoker"]) : [...(r.f || []), ...(r.any || []).flat()];
+    new Set(ids).forEach(id => { (RULES_FOR[id] = RULES_FOR[id] || []).push(r); });
+  });
+  const INDEX = FINDINGS.map(([id, g, l, s]) => ({
+    id,
+    own: new Set(tokens([l, ...s].join(" "))),
+    area: new Set(tokens(GROUP[g] || "")),
+    acts: new Set(tokens((RULES_FOR[id] || []).map(r => r.act).join(" ")))
+  }));
+
+  function search(q) {
+    const qt = tokens(q);
+    if (!qt.length) return { full: [], partial: [] };
+    const scored = INDEX.map(x => {
+      let score = 0, hit = 0;
+      qt.forEach(t => {
+        let best = 0;
+        x.own.forEach(w => { best = Math.max(best, tokMatch(t, w) * 2); });
+        if (!best) x.area.forEach(w => { best = Math.max(best, tokMatch(t, w)); });
+        if (!best) x.acts.forEach(w => { best = Math.max(best, tokMatch(t, w) ? 1 : 0); });
+        if (best) { hit++; score += best; }
+      });
+      return { id: x.id, score, hit };
+    }).filter(x => x.hit);
+    scored.sort((a, b) => b.hit - a.hit || b.score - a.score);
+    return {
+      full: scored.filter(x => x.hit === qt.length).map(x => x.id),
+      partial: scored.filter(x => x.hit < qt.length).map(x => x.id)
+    };
+  }
+
+  // ---------- Rendering ----------
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const nameOf = (id, focus) => (id === focus ? "<b>" + esc(label(id)) + "</b>" : esc(label(id)));
+
+  function whenText(r, focus) {
+    const parts = [];
+    if (r.special === "cxr") {
+      parts.push("two or more of: " + CXR_SET.map(x => nameOf(x, focus)).join(", ") + "; or one of these in someone who has " + nameOf("smoker", focus).toLowerCase());
+    } else {
+      if (r.f && r.f.length) parts.push(r.f.map(x => nameOf(x, focus)).join(" + "));
+      (r.any || []).forEach(g => parts.push("one of: " + g.map(x => nameOf(x, focus)).join(", ")));
+    }
+    const extra = [ageText(r), r.sex === "F" ? "women" : r.sex === "M" ? "men" : "", POP[r.p] || ""].filter(Boolean);
+    return parts.join(", with ") + (extra.length ? " · " + extra.join(" · ") : "");
+  }
+
+  function ruleHTML(r, focus) {
+    const src = r.src ? '<span class="src">' + esc(r.src) + "</span>" : "";
+    return '<div class="rule"><span class="tier t-' + r.u + '">' + esc(TIER[r.u]) + '</span>' +
+      '<span class="act">' + esc(r.act) + "</span>" + src +
+      '<div class="when"><span class="lbl">When: </span>' + whenText(r, focus) + "</div>" +
+      (r.note ? '<div class="note">' + esc(r.note) + "</div>" : "") + "</div>";
+  }
+
+  function cardHTML(id) {
+    const own = (RULES_FOR[id] || []).slice();
+    const viaParents = PARENTS(id).flatMap(p => (RULES_FOR[p] || []).map(r => ({ r, p })));
+    const sorted = list => list.sort((a, b) => TIER_ORDER[(a.r || a).u] - TIER_ORDER[(b.r || b).u]);
+    let html = '<div class="card"><div class="grp">' + esc(GROUP[F[id].g] || "") + "</div><h2>" + esc(F[id].l) + "</h2>";
+    if (!own.length && !viaParents.length) html += '<p class="note">No recommendation in this reference is triggered by this finding on its own.</p>';
+    sorted(own).forEach(r => { html += ruleHTML(r, id); });
+    if (viaParents.length) {
+      const names = [...new Set(viaParents.map(x => label(x.p)))].join(", ");
+      html += '<p class="via">Also counts as ' + esc(names.toLowerCase()) + ":</p>";
+      sorted(viaParents).forEach(x => { html += ruleHTML(x.r, x.p); });
+    }
+    return html + "</div>";
+  }
+
+  const out = document.getElementById("out");
+  const qBox = document.getElementById("q");
+  let showAll = false;
+
+  function noResults(q) {
+    return '<div class="nores"><p><b>No results for “' + esc(q) + '”.</b></p>' +
+      "<p>This search isn’t exhaustive. Try another word for the same thing (for example “blood in urine” or “haematuria”, “indigestion” or “dyspepsia”), browse the findings by area below, or check NG12 directly.</p>" +
+      '<p><a href="https://www.nice.org.uk/guidance/ng12" target="_blank" rel="noopener">Open NICE NG12</a></p></div>';
+  }
+
+  function run() {
+    const q = qBox.value.trim();
+    const url = new URL(location.href);
+    if (q) url.searchParams.set("q", q); else url.searchParams.delete("q");
+    history.replaceState(null, "", url);
+    if (!q) { out.innerHTML = ""; return; }
+    const { full, partial } = search(q);
+    if (!full.length && !partial.length) { out.innerHTML = noResults(q); return; }
+    const LIMIT = 6;
+    let html = "";
+    if (full.length) {
+      const list = showAll ? full : full.slice(0, LIMIT);
+      html += list.map(cardHTML).join("");
+      if (full.length > LIMIT && !showAll) html += '<button type="button" class="more" id="more">Show ' + (full.length - LIMIT) + " more</button>";
+    } else {
+      html += '<div class="nores"><p><b>No exact match for “' + esc(q) + '”.</b> These match part of your search; if none is right, try another word or check <a href="https://www.nice.org.uk/guidance/ng12" target="_blank" rel="noopener">NG12</a> directly. This search isn’t exhaustive.</p></div>';
+      html += partial.slice(0, LIMIT).map(cardHTML).join("");
+    }
+    out.innerHTML = html;
+    const more = document.getElementById("more");
+    if (more) more.addEventListener("click", () => { showAll = true; run(); });
+  }
+
+  qBox.addEventListener("input", () => { showAll = false; run(); });
+
+  // Browse list
+  const groupsEl = document.getElementById("groups");
+  GROUPS.forEach(([g, name]) => {
+    const items = FINDINGS.filter(f => f[1] === g);
+    if (!items.length) return;
+    const div = document.createElement("div");
+    div.className = "group";
+    div.innerHTML = "<h3>" + esc(name) + '</h3><div class="chips"></div>';
+    items.forEach(([id, , l]) => {
+      const b = document.createElement("button");
+      b.type = "button"; b.textContent = l;
+      b.addEventListener("click", () => {
+        out.innerHTML = cardHTML(id);
+        qBox.value = "";
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      });
+      div.querySelector(".chips").append(b);
+    });
+    groupsEl.append(div);
+  });
+
+  document.getElementById("res").innerHTML = RES.map(([, t, d, u]) =>
+    '<li><a href="' + esc(u) + '" target="_blank" rel="noopener">' + esc(t) + "</a>. " + esc(d) + "</li>").join("");
+
+  document.getElementById("pop").addEventListener("click", () => {
+    const q = qBox.value.trim();
+    window.open(location.pathname + "?compact=1" + (q ? "&q=" + encodeURIComponent(q) : ""), "gp-ng12", "width=440,height=860");
+  });
+
+  const params = new URLSearchParams(location.search);
+  if (params.get("compact") === "1") document.body.classList.add("compact");
+  if (params.get("q")) { qBox.value = params.get("q"); run(); }
+  qBox.focus();
+</script>
+</body>
+</html>
